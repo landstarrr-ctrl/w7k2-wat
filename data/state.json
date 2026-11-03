@@ -59,7 +59,12 @@
   "bizinfo:PBLN_000000000127647": "2026년ax실증밸리조성r&d사업신규지원대상과제재",
   "bizinfo:PBLN_000000000127652": "2026년sk텔레콤협력형세종시사회적배려대상자ai디지털건강케어실증참여기업모집",
   "bizinfo:PBLN_000000000127644": "대구2026년기업성장단계별맞춤형기술지원track3과제기업모집대구형r&d전주기지원체계구축",
-  "bizinfo:PBLN_000000000127640": "울산울주군2026년5차청년스마트팜보급육성지원사업지원기업모집"
+  "bizinfo:PBLN_000000000127640": "울산울주군2026년5차청년스마트팜보급육성지원사업지원기업모집",
+  "bd-b57d:8a7286bbf4f7": "중소제조특화multiaiagent개발r&d점프업track시행계획",
+  "bd-be31:9541d2ac107a": "2027년공공분야로봇도입및실증지원사업수요조사",
+  "bd-be31:ce1863274502": "2026년한국로봇산업진흥원연구장비임대운영기업모집",
+  "bd-be31:b193faee5571": "한국로봇산업진흥원2026로보월드k로봇공공프리마켓가칭참여기업모집수요조사",
+  "bd-be31:ba9ae889997d": "2026년한체코첨단로봇산업협력센터구축사업지원과제모집"
  },
  "items": [
   {
@@ -117,6 +122,46 @@
    "found_at": "2026-11-03T15:04+09:00",
    "groups": [
     "자동화·공정혁신"
+   ]
+  },
+  {
+   "id": "bd-be31:9541d2ac107a",
+   "source": "로봇산업진흥원 사업공고",
+   "title": "「2027년 공공분야 로봇 도입 및 실증지원 사업」 수요조사 공고",
+   "url": "https://kiria.org/portal/info/portalInfoBusinessList.do",
+   "org": "",
+   "period": "2026-11-02 ~ 2026-11-30",
+   "posted": "2026-11-02",
+   "keywords": [
+    "로봇·도입"
+   ],
+   "status": "",
+   "ministry": "산업통상자원부",
+   "tkey": "2027년공공분야로봇도입및실증지원사업수요조사",
+   "found_at": "2026-11-03T16:34+09:00",
+   "baseline": true,
+   "groups": [
+    "피지컬AI·로봇"
+   ]
+  },
+  {
+   "id": "bd-be31:ce1863274502",
+   "source": "로봇산업진흥원 사업공고",
+   "title": "2026년 한국로봇산업진흥원 연구장비 임대 운영 기업 모집 공고",
+   "url": "https://kiria.org/portal/info/portalInfoBusinessList.do",
+   "org": "",
+   "period": "2026-11-02 ~ 2026-12-31",
+   "posted": "2026-11-02",
+   "keywords": [
+    "로봇·산업"
+   ],
+   "status": "",
+   "ministry": "산업통상자원부",
+   "tkey": "2026년한국로봇산업진흥원연구장비임대운영기업모집",
+   "found_at": "2026-11-03T16:34+09:00",
+   "baseline": true,
+   "groups": [
+    "피지컬AI·로봇"
    ]
   },
   {
@@ -1212,6 +1257,69 @@
     "스마트공장"
    ],
    "notice_no": "(재)포항테크노파크 제2026-242호"
+  },
+  {
+   "id": "bd-be31:b193faee5571",
+   "source": "로봇산업진흥원 사업공고",
+   "title": "한국로봇산업진흥원 2026 로보월드 K-로봇 공공프리마켓(가칭) 참여기업 모집 수요조사",
+   "url": "https://kiria.org/portal/info/portalInfoBusinessList.do",
+   "org": "",
+   "period": "2026-09-07 ~ 2026-09-10",
+   "posted": "2026-09-07",
+   "keywords": [
+    "로봇·산업"
+   ],
+   "status": "",
+   "ministry": "산업통상자원부",
+   "tkey": "한국로봇산업진흥원2026로보월드k로봇공공프리마켓가칭참여기업모집수요조사",
+   "found_at": "2026-11-03T16:34+09:00",
+   "baseline": true,
+   "groups": [
+    "피지컬AI·로봇"
+   ]
+  },
+  {
+   "id": "bd-b57d:8a7286bbf4f7",
+   "source": "SMTECH 사업공고",
+   "title": "중소제조 특화 Multi AI Agent 개발(R&D) 점프업 Track 시행계획 공고",
+   "url": "https://www.smtech.go.kr/front/ifg/no/notice02_list.do",
+   "org": "",
+   "period": "2026-10-01 ~ 2026-10-30",
+   "posted": "2026-08-31",
+   "keywords": [
+    "Multi AI Agent",
+    "AI·제조",
+    "R&D·제조"
+   ],
+   "status": "",
+   "ministry": "중소벤처기업부",
+   "tkey": "중소제조특화multiaiagent개발r&d점프업track시행계획",
+   "found_at": "2026-11-03T16:34+09:00",
+   "baseline": true,
+   "groups": [
+    "제조AI·AX",
+    "데이터·솔루션·R&D"
+   ]
+  },
+  {
+   "id": "bd-be31:ba9ae889997d",
+   "source": "로봇산업진흥원 사업공고",
+   "title": "2026년도 「한-체코 첨단로봇산업 협력센터 구축사업」 지원과제 모집 공고",
+   "url": "https://kiria.org/portal/info/portalInfoBusinessList.do",
+   "org": "",
+   "period": "2026-08-10 ~ 2026-08-19",
+   "posted": "2026-07-20",
+   "keywords": [
+    "로봇·산업"
+   ],
+   "status": "",
+   "ministry": "산업통상자원부",
+   "tkey": "2026년한체코첨단로봇산업협력센터구축사업지원과제모집",
+   "found_at": "2026-11-03T16:34+09:00",
+   "baseline": true,
+   "groups": [
+    "피지컬AI·로봇"
+   ]
   }
  ],
  "sources": {
@@ -1219,19 +1327,19 @@
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T15:42+09:00"
+   "ok_time": "2026-11-03T16:34+09:00"
   },
   "중기부 누리집": {
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T15:42+09:00"
+   "ok_time": "2026-11-03T16:34+09:00"
   },
   "IRIS": {
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T15:35+09:00"
+   "ok_time": "2026-11-03T16:34+09:00"
   },
   "KOSMO 사업공고": {
    "initialized": true,
@@ -1244,10 +1352,22 @@
    "fails": 0,
    "ok_at": "2026-11-03",
    "ok_time": "2026-11-03T15:48+09:00"
+  },
+  "SMTECH 사업공고": {
+   "initialized": true,
+   "fails": 0,
+   "ok_at": "2026-11-03",
+   "ok_time": "2026-11-03T16:34+09:00"
+  },
+  "로봇산업진흥원 사업공고": {
+   "initialized": true,
+   "fails": 0,
+   "ok_at": "2026-11-03",
+   "ok_time": "2026-11-03T16:34+09:00"
   }
  },
  "heartbeat": "2026-11-03",
- "updated": "2026-11-03T16:17+09:00",
+ "updated": "2026-11-03T16:34+09:00",
  "fix": "mss-v3",
  "cfg_hash": "17193d8d9f67",
  "dash_hash": "06d3e2b0aab9"
