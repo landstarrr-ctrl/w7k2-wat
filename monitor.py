@@ -450,6 +450,59 @@ def _home_links(html: str, word: str):
     return list(dict.fromkeys(out))
 
 
+def _kosmo_browser_fetch(urls, word):
+    """진짜 크롬(헤드리스)으로 첫 화면을 거쳐 목록을 엽니다. (html, 주소, 기록) 반환."""
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        return None, None, ["브라우저 도구(playwright) 없음"]
+    tried = []
+    with sync_playwright() as p:
+        browser, kind = None, ""
+        for opts, label in (({"channel": "chrome"}, "설치된 크롬"), ({}, "내장 크로미움")):
+            try:
+                browser = p.chromium.launch(headless=True, **opts)
+                kind = label
+                break
+            except Exception as e:  # noqa: BLE001
+                tried.append(f"{label} 실행 실패: {str(e)[:60]}")
+        if browser is None:
+            return None, None, tried
+        try:
+            ctx = browser.new_context(locale="ko-KR", timezone_id="Asia/Seoul", user_agent=UA,
+                                      viewport={"width": 1366, "height": 900})
+            page = ctx.new_page()
+            home = page.goto(KOSMO_HOME, wait_until="domcontentloaded", timeout=45000)
+            page.wait_for_timeout(2000)
+            tried.append(f"브라우저({kind}) 첫 화면 → {home.status if home else '?'}")
+            for u in urls:
+                try:
+                    resp = page.goto(u, wait_until="networkidle", timeout=45000)
+                except Exception as e:  # noqa: BLE001
+                    tried.append(f"{u.split('smart-factory.kr')[-1]} → {type(e).__name__}")
+                    continue
+                html = page.content()
+                status = resp.status if resp else 0
+                tried.append(f"{u.split('smart-factory.kr')[-1]} → {status}")
+                if status == 200 and re.search(DATE_RE, html):
+                    return html, u, tried
+            # 마지막 방법: 첫 화면에서 메뉴 글자를 직접 눌러 들어가기
+            try:
+                page.goto(KOSMO_HOME, wait_until="networkidle", timeout=45000)
+                link = page.get_by_text(word, exact=True).first
+                link.click(timeout=10000, force=True)
+                page.wait_for_load_state("networkidle", timeout=45000)
+                html = page.content()
+                tried.append(f"메뉴 '{word}' 클릭 → {page.url.split('smart-factory.kr')[-1]}")
+                if re.search(DATE_RE, html):
+                    return html, page.url, tried
+            except Exception as e:  # noqa: BLE001
+                tried.append(f"메뉴 클릭 실패: {type(e).__name__}")
+            return None, None, tried
+        finally:
+            browser.close()
+
+
 def fetch_kosmo(session, board_cfg, match, take_all):
     url = board_cfg["url"]
     name = board_cfg["name"]
@@ -483,11 +536,17 @@ def fetch_kosmo(session, board_cfg, match, take_all):
             break
         time.sleep(1)
     log(f"  {name}: 시도한 주소 {tried}")
-    if r is None:
-        raise RuntimeError("목록 페이지를 열지 못했습니다(" + ", ".join(tried[:3]) + ")")
-    html = r.text
-    if "login" in str(r.url).lower():
-        log(f"  (진단) {name}: 로그인 화면으로 이동됨 → {r.url}")
+    if r is not None:
+        html = r.text
+        if "login" in str(r.url).lower():
+            log(f"  (진단) {name}: 로그인 화면으로 이동됨 → {r.url}")
+    else:
+        # 일반 접속이 막히면 진짜 크롬으로 다시 시도
+        html, burl, btried = _kosmo_browser_fetch(list(dict.fromkeys([board_cfg["url"]] + menu)), word)
+        log(f"  {name}: 브라우저 방식 {btried}")
+        if html is None:
+            raise RuntimeError("목록 페이지를 열지 못했습니다(일반 접속·브라우저 접속 모두 실패, " + ", ".join(btried[-2:]) + ")")
+        url = burl
     items, dated = parse_board(html, url, name, "kosmo-" + short_hash(board_cfg["url"])[:4], match, take_all)
     if dated == 0:
         log(f"  (진단) {name}: {_board_diagnose(html)}")
