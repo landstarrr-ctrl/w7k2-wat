@@ -912,13 +912,13 @@
   },
   "KOSMO 사업공고": {
    "initialized": false,
-   "fails": 7,
-   "error": "목록 페이지를 열지 못했습니다(/usr/bg/ba/ma/bsnsPbanc → 404(스마트공장 사업관리시스템), /usr/bg/ba/ma/bsnsPblanc → 404(스마트공장 사업관리시스템), /usr/bg/ba/ma/bsnsPbanc.do → 404(스마트공장 사업관리시스템))"
+   "fails": 8,
+   "error": "목록 페이지를 열지 못했습니다(일반 접속·브라우저 접속 모두 실패, /usr/bg/ba/ma/bsnsPbanc → 404, 메뉴 클릭 실패: TimeoutError)"
   },
   "KOSMO 모집공고": {
    "initialized": false,
-   "fails": 7,
-   "error": "목록 페이지를 열지 못했습니다(/usr/bg/ra/ma/rcrtPbanc → 404(스마트공장 사업관리시스템), /usr/bg/ra/ma/rcrtPblanc → 404(스마트공장 사업관리시스템), /usr/bg/ra/ma/rcrtPbanc.do → 404(스마트공장 사업관리시스템))"
+   "fails": 8,
+   "error": "목록 페이지를 열지 못했습니다(일반 접속·브라우저 접속 모두 실패, /usr/bg/ra/ma/rcrtPbanc → 404, 메뉴 클릭 실패: TimeoutError)"
   },
   "IRIS": {
    "initialized": true,
@@ -927,7 +927,7 @@
   }
  },
  "heartbeat": "2026-11-03",
- "updated": "2026-11-03T12:52+09:00",
+ "updated": "2026-11-03T13:02+09:00",
  "fix": "mss-v3",
  "cfg_hash": "17193d8d9f67",
  "dash_hash": "bb0299b1c6d9"
