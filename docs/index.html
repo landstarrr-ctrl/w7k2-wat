@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>정부지원과제 모니터링 시스템</title>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>업무 메모</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📮</text></svg>">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
@@ -52,6 +55,16 @@ header p{margin:0;color:var(--muted);max-width:60ch}
   font-size:14px;color:var(--muted)}
 .status img{height:20px;vertical-align:middle}
 .status .bad{color:var(--seal)}
+.kosmo{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:14px;padding:10px 14px;
+  border-radius:8px;border:1px solid var(--rule);background:var(--sheet);font-size:14px;color:var(--muted)}
+.kosmo .kdot{width:8px;height:8px;border-radius:50%;background:var(--open)}
+.kosmo .klinks{display:flex;gap:12px;margin-left:auto}
+.kosmo .klinks a{color:var(--link);font-weight:600;text-decoration:none}
+.kosmo .klinks a:hover{text-decoration:underline}
+.kosmo.off{border-color:var(--motie);background:var(--motie-bg);color:var(--ink)}
+.kosmo.off .kdot{background:var(--motie)}
+.kosmo.off .klinks a{background:var(--sheet);border:1px solid var(--motie);border-radius:6px;padding:4px 10px}
+@media (max-width:560px){.kosmo .klinks{margin-left:0;width:100%}}
 .tools{margin:32px 0 8px;display:flex;flex-direction:column;gap:12px}
 .search{width:100%;font:inherit;font-family:inherit;padding:12px 14px;border:1px solid var(--rule);border-radius:6px;
   background:var(--sheet);color:var(--ink)}
@@ -135,8 +148,9 @@ footer a{color:var(--muted)}
 </div>
 <header>
   <h1>정부지원과제 모니터링 시스템</h1>
-  <p>기업마당·중소벤처기업부·KOSMO·IRIS의 스마트공장·제조AI·자율형공장·피지컬AI 관련 공고를 분류별로 모았습니다. 새 공고는 텔레그램으로도 알려 드립니다.</p>
-  <div class="status"><a href="https://github.com/landstarrr-ctrl/gonggo-watch/actions" target="_blank" rel="noopener"><img src="https://github.com/landstarrr-ctrl/gonggo-watch/actions/workflows/monitor.yml/badge.svg" alt="감시 작동 상태"></a><span>기업마당 정상</span><span>중기부 누리집 정상</span><span class="bad">KOSMO 사업공고 확인 실패 9회</span><span class="bad">KOSMO 모집공고 확인 실패 9회</span><span>IRIS 정상</span><span>마지막 변동 2026-11-03 13:18</span></div>
+  
+  <div class="status"><a href="https://github.com/landstarrr-ctrl/gonggo-watch/actions" target="_blank" rel="noopener"><img src="https://github.com/landstarrr-ctrl/gonggo-watch/actions/workflows/monitor.yml/badge.svg" alt="감시 작동 상태"></a><span>기업마당 정상</span><span>중기부 누리집 정상</span><span>IRIS 정상</span><span>마지막 변동 2026-11-03 13:21</span></div>
+  <div class="kosmo" id="kosmo" data-last="" data-stale="150"><span class="kdot" aria-hidden="true"></span><span id="kmsg">KOSMO 확인 상태를 불러오는 중</span><span class="klinks"><a href="https://www.smart-factory.kr/usr/bg/ba/ma/bsnsPbanc" target="_blank" rel="noopener">사업공고 바로가기</a><a href="https://www.smart-factory.kr/usr/bg/ra/ma/rcrtPbanc" target="_blank" rel="noopener">모집공고 바로가기</a></span></div>
 </header>
 <div class="tools">
   <input id="q" class="search" type="search" placeholder="공고명·기관으로 찾기" aria-label="공고 검색">
@@ -163,6 +177,23 @@ footer a{color:var(--muted)}
     var h=p.hour==='24'?'00':p.hour;
     el.textContent=p.year+'년 '+p.month+'월 '+p.day+'일 ('+p.weekday+') '+h+':'+p.minute+':'+p.second;}
   tick();setInterval(tick,1000);
+  var k=document.getElementById('kosmo');
+  function kcheck(){
+    if(!k)return;
+    var last=Date.parse(k.dataset.last||''), lim=(+k.dataset.stale||150)*60000, msg=document.getElementById('kmsg');
+    var tfm=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
+    var tf={format:function(d){var q={};tfm.formatToParts(d).forEach(function(x){q[x.type]=x.value;});
+      return q.month+'월 '+q.day+'일 '+(q.hour==='24'?'00':q.hour)+':'+q.minute;}};
+    if(!isNaN(last)&&Date.now()-last<lim){
+      k.classList.remove('off');
+      msg.textContent='KOSMO 공고는 사무실 PC에서 자동 확인 중 · 마지막 '+tf.format(new Date(last));
+    }else{
+      k.classList.add('off');
+      msg.textContent=isNaN(last)?'KOSMO 공고는 사무실 PC가 켜져 있어야 자동으로 확인됩니다. 지금은 직접 확인해 주세요.'
+        :'사무실 PC가 꺼져 있어 KOSMO 공고를 자동 확인하지 못하고 있습니다(마지막 '+tf.format(new Date(last))+'). 직접 확인해 주세요.';
+    }
+  }
+  kcheck();setInterval(kcheck,60000);
 })();
 </script>
 <script>
