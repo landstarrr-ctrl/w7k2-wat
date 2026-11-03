@@ -87,16 +87,71 @@ def log(msg: str) -> None:
     print(f"[{now_kst():%H:%M:%S}] {msg}", flush=True)
 
 
+def _compile_alt(alt: str):
+    """키워드 하나를 검사 함수로 바꿉니다. 영어 키워드는 단어 단위로만 잡습니다."""
+    if all(ord(c) < 128 for c in alt):
+        chars = [re.escape(ch) for ch in alt.lower() if not ch.isspace()]
+        pat = re.compile(r"(?<![a-z0-9])" + r"\s*".join(chars) + r"(?![a-z0-9])")
+        return lambda spaced, nospace: bool(pat.search(spaced))
+    key = norm(alt)
+    return lambda spaced, nospace: key in nospace
+
+
+class Rule:
+    """'AI + 제조|공장' 같은 규칙: + 는 그리고, | 는 또는."""
+
+    def __init__(self, raw):
+        self.raw = str(raw)
+        self.parts = []
+        for part in self.raw.split("+"):
+            alts = [a.strip() for a in part.split("|") if a.strip()]
+            if alts:
+                self.parts.append([(a, _compile_alt(a)) for a in alts])
+
+    def match(self, spaced: str, nospace: str):
+        labels = []
+        for alts in self.parts:
+            hit = next((a for a, f in alts if f(spaced, nospace)), None)
+            if hit is None:
+                return None
+            labels.append(hit)
+        return "·".join(labels) if labels else None
+
+
 class Matcher:
-    def __init__(self, keywords, exclude):
-        self.keywords = [(k, norm(k)) for k in keywords or [] if norm(k)]
-        self.exclude = [norm(e) for e in exclude or [] if norm(e)]
+    def __init__(self, cfg: dict):
+        groups = cfg.get("groups")
+        if not groups:  # 예전 설정 파일(keywords 목록 하나) 호환
+            groups = [{"name": "키워드", "keywords": cfg.get("keywords") or []}]
+        self.groups = [(clean(g["name"]), [Rule(k) for k in g.get("keywords") or []])
+                       for g in groups if g and g.get("name")]
+        self.exclude = [Rule(e) for e in cfg.get("exclude") or []]
+        self.names = [n for n, _ in self.groups]
+        self.keywords = [r.raw for _, rules in self.groups for r in rules]
+
+    def classify(self, text: str):
+        spaced = re.sub(r"\s+", " ", str(text or "")).lower()
+        nospace = norm(text)
+        if any(r.match(spaced, nospace) for r in self.exclude):
+            return [], []
+        labels, groups = [], []
+        for name, rules in self.groups:
+            for r in rules:
+                lab = r.match(spaced, nospace)
+                if lab:
+                    if name not in groups:
+                        groups.append(name)
+                    if lab not in labels:
+                        labels.append(lab)
+        return labels, groups
 
     def __call__(self, text: str) -> list[str]:
-        t = norm(text)
-        if any(e in t for e in self.exclude):
-            return []
-        return [k for k, nk in self.keywords if nk in t]
+        return self.classify(text)[0]
+
+
+def config_hash(cfg: dict) -> str:
+    key = {k: cfg.get(k) for k in ("groups", "keywords", "exclude", "match_summary")}
+    return hashlib.sha1(json.dumps(key, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()[:12]
 
 
 def http_get(session: requests.Session, url: str, **kw) -> requests.Response:
@@ -124,40 +179,46 @@ def fetch_bizinfo(session, cfg, match, match_summary):
         data = r.json()
     except ValueError:
         raise RuntimeError("기업마당 API가 JSON이 아닌 응답을 보냈습니다: " + clean(r.text)[:120])
-    if isinstance(data, dict):
-        if data.get("reqErr"):
-            raise RuntimeError(f"기업마당 API 오류: {data['reqErr']}")
-        rows = data.get("jsonArray") or []
-    elif isinstance(data, list):
-        rows = data
-    else:
+    if isinstance(data, dict) and data.get("reqErr"):
+        raise RuntimeError(f"기업마당 API 오류: {data['reqErr']}")
+    # 응답 형태가 {"jsonArray":[...]} 또는 {"jsonArray":{"item":[...]}} 둘 다 올 수 있음
+    rows = data.get("jsonArray", data) if isinstance(data, dict) else data
+    if isinstance(rows, dict):
+        rows = rows.get("item") or rows.get("items") or []
+    if isinstance(rows, dict):          # 공고가 1건이면 목록 대신 하나만 올 수 있음
+        rows = [rows]
+    if not isinstance(rows, list):
         rows = []
+    rows = [r for r in rows if isinstance(r, dict)]
 
     items = []
     for row in rows:
-        title = clean(row.get("pblancNm"))
+        title = clean(row.get("pblancNm") or row.get("title"))
         if not title:
             continue
-        text = title + " " + clean(row.get("hashtags"))
+        tags = clean(row.get("hashTags") or row.get("hashtags"))
+        text = title + " " + tags
         if match_summary:
-            summary = BeautifulSoup(row.get("bsnsSumryCn") or "", "html.parser").get_text(" ")
+            summary_html = row.get("bsnsSumryCn") or row.get("description") or ""
+            summary = BeautifulSoup(summary_html, "html.parser").get_text(" ")
             text += " " + summary
         hits = match(text)
         if not hits:
             continue
-        url = row.get("pblancUrl") or ""
+        url = row.get("pblancUrl") or row.get("link") or ""
         if url and not url.startswith("http"):
             url = urljoin("https://www.bizinfo.go.kr", url)
-        orgs = [clean(row.get("jrsdInsttNm")), clean(row.get("excInsttNm"))]
+        orgs = [clean(row.get("jrsdInsttNm") or row.get("author")), clean(row.get("excInsttNm"))]
         items.append({
-            "id": "bizinfo:" + (clean(row.get("pblancId")) or short_hash(title)),
+            "id": "bizinfo:" + (clean(row.get("pblancId") or row.get("seq")) or short_hash(title)),
             "source": "기업마당",
             "title": title,
             "url": url or "https://www.bizinfo.go.kr",
             "org": " / ".join(dict.fromkeys(o for o in orgs if o)),
-            "period": fmt_period(row.get("reqstBeginEndDe")),
-            "posted": clean(row.get("creatPnttm"))[:10],
+            "period": fmt_period(row.get("reqstBeginEndDe") or row.get("reqstDt")),
+            "posted": clean(row.get("creatPnttm") or row.get("pubDate"))[:10],
             "keywords": hits,
+            "tags": tags,
         })
     return items
 
@@ -263,7 +324,8 @@ def dashboard_url(cfg) -> str:
 
 def _item_block_tg(it) -> str:
     e = html.escape
-    lines = [f"<b>{e(it['title'])}</b>"]
+    tag = f"[{' / '.join(it.get('groups') or [])}] " if it.get("groups") else ""
+    lines = [f"<b>{e(tag + it['title'])}</b>"]
     if it.get("org"):
         lines.append(e(it["org"]))
     if it.get("period"):
@@ -327,8 +389,8 @@ def _email_html(header: str, items: list[dict], notes: list[str], dash: str) -> 
     for n in notes:
         parts.append(f"<p>{e(n)}</p>")
     for it in items:
-        meta = " / ".join(x for x in [it.get("org"), it.get("period") and f"신청기간 {it['period']}",
-                                       it["source"]] if x)
+        meta = " / ".join(x for x in [" · ".join(it.get("groups") or []), it.get("org"),
+                                       it.get("period") and f"신청기간 {it['period']}", it["source"]] if x)
         parts.append(
             f'<div style="border-top:1px solid #ddd;padding:10px 0">'
             f'<a href="{e(it["url"], quote=True)}" style="font-weight:bold;font-size:15px">{e(it["title"])}</a>'
@@ -391,14 +453,30 @@ def sort_key(it):
 
 
 # ───────────────────────── 대시보드 ─────────────────────────
-def render_dashboard(cfg, state) -> None:
+def classify_item(matcher, it) -> None:
+    text = " ".join([it.get("title", ""), it.get("tags", ""), " ".join(it.get("keywords") or [])])
+    labels, groups = matcher.classify(text)
+    it["groups"] = groups
+    if labels:
+        it["keywords"] = labels
+
+
+def group_summary(items) -> str:
+    counts = {}
+    for it in items:
+        for g in it.get("groups") or ["기타"]:
+            counts[g] = counts.get(g, 0) + 1
+    return ", ".join(f"{g} {n}건" for g, n in counts.items())
+
+
+def render_dashboard(cfg, state, matcher) -> None:
     from dashboard import render  # 같은 폴더의 dashboard.py
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
     repo = os.environ.get("GITHUB_REPOSITORY", "")
     page = render(
         title=(cfg.get("dashboard") or {}).get("title") or "공고 감시",
         items=state["items"],
-        keywords=cfg.get("keywords") or [],
+        groups=matcher.names,
         sources=state["sources"],
         updated=state.get("updated", ""),
         repo=repo,
@@ -431,7 +509,11 @@ def build_sources(cfg, session, match):
 
 def run(cfg, dry_run=False) -> int:
     state = load_state()
-    match = Matcher(cfg.get("keywords"), cfg.get("exclude"))
+    match = Matcher(cfg)
+    cfg_id = config_hash(cfg)
+    # 키워드를 바꾼 뒤 첫 실행: 새로 잡힌 기존 공고는 하나씩 알리지 않고 요약만 보냄
+    backfill = (state.get("cfg_hash") != cfg_id
+                and any(st.get("initialized") for st in state["sources"].values()))
     session = requests.Session()
     session.headers.update({"User-Agent": UA, "Accept-Language": "ko-KR,ko;q=0.9"})
 
@@ -520,9 +602,22 @@ def run(cfg, dry_run=False) -> int:
             log(f"  - {it['title']} [{it['source']}]")
         return 0
 
-    if pending:
+    for it in pending + baseline:
+        classify_item(match, it)
+
+    if pending and backfill:
+        for it in pending:
+            state["seen"][it["id"]] = it["tkey"]
+            state["items"].append(it)
+        changed = True
+        notify(cfg, f"키워드 변경으로 공고 {len(pending)}건을 추가했습니다", notes=[
+            f"분류: {group_summary(pending)}",
+            "이미 올라와 있던 공고라 하나씩 알리지 않았습니다. 대시보드에서 '신규' 도장이 찍힌 공고를 확인하세요.",
+        ])
+    elif pending:
         pending.sort(key=sort_key, reverse=True)
-        ok = notify(cfg, f"새 공고 {len(pending)}건", items=pending)
+        header = f"새 공고 {len(pending)}건 ({group_summary(pending)})"
+        ok = notify(cfg, header, items=pending)
         if ok:
             for it in pending:
                 state["seen"][it["id"]] = it["tkey"]
@@ -530,6 +625,9 @@ def run(cfg, dry_run=False) -> int:
             changed = True
         else:
             log("알림 전송에 실패해 이번 공고는 다음 실행 때 다시 보냅니다.")
+    if state.get("cfg_hash") != cfg_id:
+        state["cfg_hash"] = cfg_id
+        changed = True
     if baseline_notes:
         notes = baseline_notes + ["지금부터 새로 올라오는 공고만 알려 드립니다."]
         notify(cfg, "공고 감시를 시작했습니다", notes=notes)
@@ -543,12 +641,14 @@ def run(cfg, dry_run=False) -> int:
         changed = True
 
     if changed:
-        keep = int((cfg.get("dashboard") or {}).get("keep") or 300)
+        for it in state["items"]:   # 설정이 바뀌어도 탭 분류가 최신이 되도록 다시 계산
+            classify_item(match, it)
+        keep = int((cfg.get("dashboard") or {}).get("keep") or 500)
         state["items"].sort(key=sort_key, reverse=True)
         state["items"] = state["items"][:keep]
         state["updated"] = stamp
         save_state(state)
-        render_dashboard(cfg, state)
+        render_dashboard(cfg, state, match)
         log("상태와 대시보드를 저장했습니다.")
     else:
         log("변동 없음")
