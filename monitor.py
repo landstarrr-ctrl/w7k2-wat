@@ -1145,17 +1145,18 @@ def render_dashboard(cfg, state, matcher) -> None:
     kstate = load_state(KOSMO_PATH)
     items = merged_items(state, kstate, matcher)
     kcfg = (cfg.get("sources") or {}).get("kosmo") or {}
+    kosmo_pc = kosmo_on_pc(cfg)
     page = render(
         title=(cfg.get("dashboard") or {}).get("title") or "공고 감시",
         tab_title=(cfg.get("dashboard") or {}).get("tab_title") or "",
         description=(cfg.get("dashboard") or {}).get("description") or "",
         items=items,
         groups=matcher.names + (["기타"] if any("기타" in (it.get("groups") or []) for it in items) else []),
-        sources={k: v for k, v in state["sources"].items() if k not in kosmo_names(cfg)},
+        sources={k: v for k, v in state["sources"].items() if not kosmo_pc or k not in kosmo_names(cfg)},
         updated=max(state.get("updated", ""), kstate.get("updated", "")),
         repo=repo,
         new_hours=NEW_BADGE_HOURS,
-        kosmo={"boards": [b for b in kcfg.get("boards") or [] if b] if kcfg.get("enabled") else [],
+        kosmo={"boards": [b for b in kcfg.get("boards") or [] if b] if kcfg.get("enabled") and kosmo_pc else [],
                "last": max([kstate["sources"].get(n, {}).get("ok_time", "") for n in kosmo_names(cfg)] or [""]),
                "stale_min": int(kcfg.get("stale_minutes") or 150)},
         now=now_kst(),
@@ -1172,6 +1173,11 @@ def render_dashboard(cfg, state, matcher) -> None:
 # ───────────────────────── 실행 ─────────────────────────
 def on_github_server() -> bool:
     return os.environ.get("RUNNER_ENVIRONMENT", "").lower() == "github-hosted"
+
+
+def kosmo_on_pc(cfg) -> bool:
+    k = (cfg.get("sources") or {}).get("kosmo") or {}
+    return (k.get("run_on") or "pc").lower() == "pc"
 
 
 def kosmo_names(cfg) -> list[str]:
@@ -1255,7 +1261,7 @@ def run(cfg, dry_run=False, only=None) -> int:
     for it in state["items"] + other["items"]:   # 비교 규칙이 바뀌어도 예전 기록과 맞도록 다시 계산
         it["tkey"] = title_key(it.get("title", ""))
 
-    if not pc_mode:                     # KOSMO 상태는 이제 kosmo.json에서 관리 → 예전 기록 정리
+    if not pc_mode and kosmo_on_pc(cfg):   # PC 담당일 때만 KOSMO 상태를 kosmo.json으로 넘김
         for kn in kosmo_names(cfg):
             if kn in state["sources"] and on_github_server():
                 state["sources"].pop(kn)

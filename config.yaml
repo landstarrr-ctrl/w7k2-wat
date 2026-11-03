@@ -117,11 +117,12 @@ sources:
   # KOSMO(스마트제조혁신추진단) 스마트공장 사업관리시스템 게시판
   # take_all: true → 키워드와 상관없이 모든 글을 수집하고, 키워드는 탭 분류에만 사용
   #                  (키워드에 안 맞는 글은 '기타' 탭으로)
-  # run_on: pc → GitHub 서버(해외)에서는 열리지 않아 사무실 PC 실행기에서만 확인
-  #        대시보드는 PC 소식이 stale_minutes(분) 넘게 없으면 바로가기 안내를 띄움
+  # run_on: github → GitHub 서버가 다른 출처와 함께 확인 (기본 추천)
+  #        pc     → 사무실 PC 실행기에서만 확인, 대시보드는 PC 소식이
+  #                 stale_minutes(분) 넘게 없으면 바로가기 안내를 띄움
   kosmo:
     enabled: true
-    run_on: pc
+    run_on: github
     stale_minutes: 150
     take_all: true
     boards:
