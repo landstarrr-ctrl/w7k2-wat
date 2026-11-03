@@ -53,10 +53,10 @@ header p{margin:0;color:var(--muted);max-width:60ch}
 a.title.khelp{position:relative}
 a.title.khelp:hover::after{content:attr(data-tip);position:absolute;left:0;top:100%;margin-top:7px;
   width:max-content;max-width:min(360px,80vw);white-space:normal;z-index:6;
-  background:var(--ink);color:var(--card);font-size:12px;font-weight:500;line-height:1.5;
+  background:#232B37;color:#F4F7FB;font-size:12px;font-weight:500;line-height:1.5;
   padding:7px 11px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.18);pointer-events:none}
 a.title.khelp:hover::before{content:"";position:absolute;left:16px;top:100%;margin-top:2px;z-index:6;
-  border:5px solid transparent;border-bottom-color:var(--ink);pointer-events:none}
+  border:5px solid transparent;border-bottom-color:#232B37;pointer-events:none}
 .minilegend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:10px 0 0;font-size:12px;color:var(--muted)}
 .minilegend .lg{display:inline-flex;align-items:center;gap:6px}
 .minilegend i{width:10px;height:10px;border-radius:3px;display:inline-block}
