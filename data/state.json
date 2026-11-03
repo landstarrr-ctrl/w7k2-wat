@@ -44,9 +44,42 @@
   "iris:024657": "2027년소재부품장비양산성능평가지원사업총괄주관연구개발기관모집",
   "bizinfo:PBLN_000000000127301": "대구2026년대학기업협업프로젝트참여기업추가모집경북대학교지역전략산업혁신연구소",
   "bizinfo:PBLN_000000000127152": "2026년5차자동차대체부품장비사용기업모집",
-  "bizinfo:PBLN_000000000127116": "2026년일본다자간국제공동기술개발사업eurekaglobalstarscallwithjapan"
+  "bizinfo:PBLN_000000000127116": "2026년일본다자간국제공동기술개발사업eurekaglobalstarscallwithjapan",
+  "kosmo-a07e:2026-N-0222": "lg전자2026년대중소상생형ai트랙스마트공장구축지원유형12차",
+  "kosmo-a07e:2026-N-0214": "삼성디스플레이선정기업대상2026대중소상생형스마트공장구축사업",
+  "kosmo-a07e:2026-N-0223": "한국교통안전공단대중소상생형스마트공장구축지원사업고도화",
+  "kosmo-a07e:2026-N-0211": "2026년경남제조ai데이터활용지원사업",
+  "kosmo-a07e:2026-N-0203": "2026년경북지역특화형방산모빌리티스마트공장보급확산사업기초단계모집연장",
+  "kosmo-a07e:2026-N-0217": "농협경제지주대중소상생형스마트공장구축지원사업기초",
+  "kosmo-a07e:2026-N-0218": "농협경제지주대중소상생형스마트공장구축지원사업고도화",
+  "kosmo-a07e:2026-N-0219": "농협경제지주대중소상생형스마트공장구축지원사업ai트랙",
+  "kosmo-a07e:2026-N-0205": "2026년경북형포항스마트공장기초단계구축지원사업3차모집동일수준",
+  "kosmo-8747:2026-N-0090": "2026년k푸드스마트제조얼라이언스운영기관모집",
+  "kosmo-8747:2026-N-0091": "2026년k뷰티스마트제조얼라이언스운영기관모집"
  },
  "items": [
+  {
+   "id": "kosmo-a07e:2026-N-0222",
+   "source": "KOSMO 사업공고",
+   "title": "[LG전자] 2026년도 대중소 상생형(AI트랙) 스마트공장 구축지원 (유형1) (2차)",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-11-02",
+   "keywords": [
+    "AI·공장",
+    "스마트공장"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "lg전자2026년대중소상생형ai트랙스마트공장구축지원유형12차",
+   "found_at": "2026-11-03T14:58+09:00",
+   "quiet": true,
+   "groups": [
+    "제조AI·AX",
+    "스마트공장"
+   ]
+  },
   {
    "id": "iris:024717",
    "source": "IRIS",
@@ -730,6 +763,46 @@
    ]
   },
   {
+   "id": "kosmo-8747:2026-N-0090",
+   "source": "KOSMO 모집공고",
+   "title": "2026년 K-푸드 스마트제조 얼라이언스 운영기관 모집",
+   "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-10-15",
+   "keywords": [
+    "스마트제조"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "2026년k푸드스마트제조얼라이언스운영기관모집",
+   "found_at": "2026-11-03T14:58+09:00",
+   "quiet": true,
+   "groups": [
+    "스마트공장"
+   ]
+  },
+  {
+   "id": "kosmo-8747:2026-N-0091",
+   "source": "KOSMO 모집공고",
+   "title": "2026년 K-뷰티 스마트제조 얼라이언스 운영기관 모집",
+   "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-10-15",
+   "keywords": [
+    "스마트제조"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "2026년k뷰티스마트제조얼라이언스운영기관모집",
+   "found_at": "2026-11-03T14:58+09:00",
+   "quiet": true,
+   "groups": [
+    "스마트공장"
+   ]
+  },
+  {
    "id": "bizinfo:PBLN_000000000127227",
    "source": "기업마당",
    "title": "[경기] 성남시 2026년 피지컬 AI 자율실험 기반구축 지원사업 수혜기업 모집 통합 공고(산업혁신기반구축사업 혼합현실(Mixed Reality 기반 피지컬AI 자율실험 기반구축)",
@@ -766,6 +839,26 @@
    "found_at": "2026-11-03T12:15+09:00",
    "groups": [
     "제조AI·AX"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:2026-N-0214",
+   "source": "KOSMO 사업공고",
+   "title": "[삼성디스플레이] (선정기업대상) 2026 대중소 상생형 스마트공장 구축 사업",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-10-14",
+   "keywords": [
+    "스마트공장"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "삼성디스플레이선정기업대상2026대중소상생형스마트공장구축사업",
+   "found_at": "2026-11-03T14:58+09:00",
+   "quiet": true,
+   "groups": [
+    "스마트공장"
    ]
   },
   {
@@ -843,6 +936,27 @@
    ]
   },
   {
+   "id": "kosmo-a07e:2026-N-0223",
+   "source": "KOSMO 사업공고",
+   "title": "[한국교통안전공단] 대중소 상생형 스마트공장 구축지원사업_고도화",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-10-13",
+   "keywords": [
+    "스마트공장",
+    "고도화·공장"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "한국교통안전공단대중소상생형스마트공장구축지원사업고도화",
+   "found_at": "2026-11-03T14:58+09:00",
+   "quiet": true,
+   "groups": [
+    "스마트공장"
+   ]
+  },
+  {
    "id": "bizinfo:PBLN_000000000127152",
    "source": "기업마당",
    "title": "2026년 5차 자동차 대체부품 장비사용기업 모집 공고",
@@ -881,6 +995,48 @@
    ]
   },
   {
+   "id": "kosmo-a07e:2026-N-0211",
+   "source": "KOSMO 사업공고",
+   "title": "2026년 경남 제조AI 데이터 활용지원 사업 공고",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-10-07",
+   "keywords": [
+    "제조AI",
+    "AI·제조"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "2026년경남제조ai데이터활용지원사업",
+   "found_at": "2026-11-03T14:58+09:00",
+   "quiet": true,
+   "groups": [
+    "제조AI·AX"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:2026-N-0203",
+   "source": "KOSMO 사업공고",
+   "title": "2026년 경북 지역특화형(방산·모빌리티) 스마트공장 보급확산 사업(기초단계) 모집 공고(연장)",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-10-06",
+   "keywords": [
+    "스마트공장",
+    "지역특화형"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "2026년경북지역특화형방산모빌리티스마트공장보급확산사업기초단계모집연장",
+   "found_at": "2026-11-03T14:58+09:00",
+   "quiet": true,
+   "groups": [
+    "스마트공장"
+   ]
+  },
+  {
    "id": "bizinfo:PBLN_000000000126963",
    "source": "기업마당",
    "title": "의료기기ㆍ바이오 부품ㆍ모듈 인증시험 기술지원 참여기업 모집 수정 공고(AIㆍ빅데이터 기반 의료ㆍ바이오 첨단기기 연구제조센터 구축)",
@@ -896,6 +1052,89 @@
    "found_at": "2026-11-03T12:15+09:00",
    "groups": [
     "제조AI·AX"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:2026-N-0217",
+   "source": "KOSMO 사업공고",
+   "title": "[농협경제지주] 대중소 상생형 스마트공장 구축지원사업_기초",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-10-01",
+   "keywords": [
+    "스마트공장"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "농협경제지주대중소상생형스마트공장구축지원사업기초",
+   "found_at": "2026-11-03T14:58+09:00",
+   "quiet": true,
+   "groups": [
+    "스마트공장"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:2026-N-0218",
+   "source": "KOSMO 사업공고",
+   "title": "[농협경제지주] 대중소 상생형 스마트공장 구축지원사업_고도화",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-10-01",
+   "keywords": [
+    "스마트공장",
+    "고도화·공장"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "농협경제지주대중소상생형스마트공장구축지원사업고도화",
+   "found_at": "2026-11-03T14:58+09:00",
+   "quiet": true,
+   "groups": [
+    "스마트공장"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:2026-N-0219",
+   "source": "KOSMO 사업공고",
+   "title": "[농협경제지주] 대중소 상생형 스마트공장 구축지원사업_AI트랙",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-10-01",
+   "keywords": [
+    "AI·공장",
+    "스마트공장"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "농협경제지주대중소상생형스마트공장구축지원사업ai트랙",
+   "found_at": "2026-11-03T14:58+09:00",
+   "quiet": true,
+   "groups": [
+    "제조AI·AX",
+    "스마트공장"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:2026-N-0205",
+   "source": "KOSMO 사업공고",
+   "title": "2026년 경북형(포항) 스마트공장(기초단계) 구축지원사업 3차모집 공고(동일수준)",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-09-30",
+   "keywords": [
+    "스마트공장"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "2026년경북형포항스마트공장기초단계구축지원사업3차모집동일수준",
+   "found_at": "2026-11-03T14:58+09:00",
+   "quiet": true,
+   "groups": [
+    "스마트공장"
    ]
   }
  ],
@@ -917,10 +1156,22 @@
    "fails": 0,
    "ok_at": "2026-11-03",
    "ok_time": "2026-11-03T14:44+09:00"
+  },
+  "KOSMO 사업공고": {
+   "initialized": true,
+   "fails": 0,
+   "ok_at": "2026-11-03",
+   "ok_time": "2026-11-03T14:58+09:00"
+  },
+  "KOSMO 모집공고": {
+   "initialized": true,
+   "fails": 0,
+   "ok_at": "2026-11-03",
+   "ok_time": "2026-11-03T14:58+09:00"
   }
  },
  "heartbeat": "2026-11-03",
- "updated": "2026-11-03T14:44+09:00",
+ "updated": "2026-11-03T14:58+09:00",
  "fix": "mss-v3",
  "cfg_hash": "17193d8d9f67",
  "dash_hash": "fe6f0f534de9"
