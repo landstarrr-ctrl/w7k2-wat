@@ -471,19 +471,25 @@ def _kosmo_browser_fetch(urls, word):
         from playwright.sync_api import sync_playwright
     except ImportError:
         return None, None, ["브라우저 도구(playwright) 없음"], []
-    tried, captured, fallback = [], [], {}
+    tried, captured, fallback, netlog = [], [], {}, []
 
     def on_response(resp):
         try:
+            u = resp.url
+            if "smart-factory.kr" in u and ("/usr/" in u or "/cm" in u or ".do" in u) and len(netlog) < 80:
+                netlog.append(f"{u.split('smart-factory.kr')[-1].split('?')[0]} → {resp.status}")
             ctype = (resp.headers or {}).get("content-type", "")
             if "json" not in ctype or resp.status != 200 or len(captured) >= 40:
                 return
             body = resp.body()
             if len(body) > 3_000_000:
                 return
-            captured.append((resp.url, json.loads(body.decode("utf-8", "replace"))))
+            captured.append((u, json.loads(body.decode("utf-8", "replace"))))
         except Exception:  # noqa: BLE001
             pass
+
+    def listed(html):
+        return "접수기간" in html and "공고일자" in html
 
     def settle(page):
         try:
@@ -493,10 +499,15 @@ def _kosmo_browser_fetch(urls, word):
         try:
             page.wait_for_selector("text=접수기간", timeout=15000)
         except Exception:  # noqa: BLE001
-            try:
-                page.wait_for_selector("text=공고일자", timeout=5000)
+            page.wait_for_timeout(3000)
+        if not listed(page.content()):
+            try:                              # 목록이 안 보이면 사람이 하듯 '조회'를 눌러 봄
+                btn = page.get_by_text("조회", exact=True).first
+                if btn.is_visible():
+                    btn.click(timeout=5000, force=True)
+                    page.wait_for_selector("text=접수기간", timeout=12000)
             except Exception:  # noqa: BLE001
-                page.wait_for_timeout(3000)
+                pass
 
     modes = [
         ("화면 있는 크롬", {"channel": "chrome", "headless": False,
@@ -543,7 +554,7 @@ def _kosmo_browser_fetch(urls, word):
                         html = page.content()
                         status = resp.status if resp else 0
                         tried.append(f"{label}/{step} {u.replace('https://', '')} → {status}")
-                        if status == 200 and ("접수기간" in html or "공고일자" in html):
+                        if status == 200 and listed(html):
                             return html, u, tried, captured
                         if status == 200 and captured and not fallback:
                             fallback = {"html": html, "url": u}
@@ -555,7 +566,7 @@ def _kosmo_browser_fetch(urls, word):
                     settle(page)
                     html = page.content()
                     tried.append(f"{label}/메뉴 '{word}' 클릭 → {page.url.replace('https://', '')}")
-                    if "접수기간" in html or "공고일자" in html:
+                    if listed(html):
                         return html, page.url, tried, captured
                     if captured and not fallback:
                         fallback = {"html": html, "url": page.url}
@@ -565,6 +576,10 @@ def _kosmo_browser_fetch(urls, word):
                 browser.close()
             if fallback:
                 break
+    bad = [n for n in netlog if not n.endswith("→ 200")]
+    inter = [n for n in netlog if re.search(r"pbanc|bsns|rcrt|ancm", n, re.I)]
+    for line in (inter + bad)[:10]:
+        tried.append(f"통신 {line}")
     if fallback:
         return fallback["html"], fallback["url"], tried, captured
     return None, None, tried, captured
@@ -652,7 +667,8 @@ def parse_kosmo_json(captured, base_url, source, kid, match, take_all):
                         and "|" not in v and not _ymd_any(v)]
                 if not pool:
                     continue
-                title = max(pool, key=len)
+                title = max(pool, key=len).replace("&nbsp;", " ").replace("\xa0", " ")
+                title = re.sub(r"&[a-z]+;", " ", title)
                 if not re.search("공고|사업|모집|지원|선정|실증|구축", title):
                     continue
                 dates = {k: _ymd_any(v) for k, v in strs.items() if _ymd_any(v) and len(v) <= 19}
@@ -1163,9 +1179,9 @@ def run(cfg, dry_run=False, only=None) -> int:
     dup_links: list[tuple[str, dict]] = []
 
     # 한 번만 실행: 예전 버전의 오류 정리 후 중기부 게시판을 조용히 다시 기록
-    if pc_mode and state.get("fix") != "kosmo-v2":
+    if pc_mode and state.get("fix") != "kosmo-v3":
         n = len(state["items"])
-        state.update({"items": [], "seen": {}, "sources": {}, "fix": "kosmo-v2"})
+        state.update({"items": [], "seen": {}, "sources": {}, "fix": "kosmo-v3"})
         changed = True
         if n:
             log(f"KOSMO 기록 정리: 잘못 수집된 {n}건을 지우고 다시 확인합니다.")
