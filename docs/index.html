@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>스마트제조혁신 공고 감시</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📮</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF1F4; --sheet:#FFFFFF; --ink:#18212B; --muted:#5B6774; --rule:#D3DAE1;
+  --seal:#C22E28; --link:#1D4C89; --chip:#E2E8EE; --chip-on:#18212B; --chip-on-ink:#FFFFFF;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#11161C; --sheet:#182029; --ink:#E4E9EE; --muted:#93A0AD; --rule:#2A3440;
+    --seal:#E5534B; --link:#8EB6F2; --chip:#232D38; --chip-on:#E4E9EE; --chip-on-ink:#11161C;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);
+  font-family:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+header h1{font-size:30px;line-height:1.25;font-weight:700;letter-spacing:-.02em;margin:0 0 8px}
+header p{margin:0;color:var(--muted);max-width:60ch}
+.status{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;margin:18px 0 0;
+  font-size:14px;color:var(--muted)}
+.status img{height:20px;vertical-align:middle}
+.status .bad{color:var(--seal)}
+.tools{margin:32px 0 8px;display:flex;flex-direction:column;gap:12px}
+.search{width:100%;font:inherit;padding:12px 14px;border:1px solid var(--rule);border-radius:6px;
+  background:var(--sheet);color:var(--ink)}
+.search:focus-visible,.chip:focus-visible,a:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:13px;border:0;border-radius:999px;padding:5px 12px;cursor:pointer;
+  background:var(--chip);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--chip-on);color:var(--chip-on-ink)}
+.count{font-size:14px;color:var(--muted);margin:4px 0 0}
+section.month{margin-top:36px}
+section.month h2{font-size:15px;font-weight:600;color:var(--muted);margin:0 0 6px;
+  padding-bottom:6px;border-bottom:2px solid var(--ink)}
+ol.list{list-style:none;margin:0;padding:0;background:var(--sheet);border-radius:0 0 6px 6px}
+li.row{position:relative;display:grid;grid-template-columns:64px 1fr;gap:14px;
+  padding:16px 88px 16px 14px;border-bottom:1px solid var(--rule)}
+li.row:last-child{border-bottom:0}
+.date{font-variant-numeric:tabular-nums;font-size:20px;font-weight:600;line-height:1.2;color:var(--ink)}
+.date small{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+.title{font-size:16px;font-weight:600;color:var(--link);text-decoration:none}
+.title:hover{text-decoration:underline}
+.meta{display:flex;flex-wrap:wrap;gap:2px 16px;margin-top:4px;font-size:13px;color:var(--muted)}
+.meta b{font-weight:500;color:var(--ink);margin-right:4px}
+.meta a{color:var(--muted)}
+.kw{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.kw span{font-size:12px;padding:1px 8px;border-radius:4px;background:var(--chip);color:var(--muted)}
+.seal{display:none;position:absolute;right:18px;top:16px;width:54px;height:54px;border-radius:50%;
+  border:2.5px solid var(--seal);color:var(--seal);font-weight:700;font-size:14px;
+  align-items:center;justify-content:center;transform:rotate(-12deg);letter-spacing:.08em}
+.seal::after{content:"";position:absolute;inset:3px;border-radius:50%;border:1px solid var(--seal);opacity:.6}
+li.is-new .seal{display:flex}
+.empty{background:var(--sheet);border-radius:6px;padding:32px 20px;color:var(--muted);margin-top:36px}
+[hidden]{display:none!important}
+footer{margin-top:48px;font-size:13px;color:var(--muted)}
+footer a{color:var(--muted)}
+@media (max-width:560px){
+  .wrap{padding:28px 14px 64px}
+  header h1{font-size:24px}
+  li.row{grid-template-columns:1fr;gap:4px;padding:14px 70px 14px 12px}
+  .date{font-size:15px}.date small{display:inline;margin-left:6px}
+  .seal{width:46px;height:46px;font-size:12px;right:12px}
+}
+@media (prefers-reduced-motion:no-preference){
+  li.is-new .seal{animation:stamp .5s cubic-bezier(.3,1.6,.5,1) both}
+  @keyframes stamp{from{transform:rotate(-12deg) scale(1.8);opacity:0}to{transform:rotate(-12deg) scale(1);opacity:1}}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>스마트제조혁신 공고 감시</h1>
+  <p>기업마당과 중소벤처기업부 사업공고 중 설정한 키워드에 맞는 공고만 모았습니다. 새 공고는 텔레그램·이메일로도 알려 드립니다.</p>
+  <div class="status"><a href="https://github.com/landstarrr-ctrl/gonggo-watch/actions" target="_blank" rel="noopener"><img src="https://github.com/landstarrr-ctrl/gonggo-watch/actions/workflows/monitor.yml/badge.svg" alt="감시 작동 상태"></a><span>중기부 누리집 정상</span><span>마지막 변동 2026-11-03 11:28</span></div>
+</header>
+<div class="tools">
+  <input id="q" class="search" type="search" placeholder="공고명·기관으로 찾기" aria-label="공고 검색">
+  <div class="chips" role="group" aria-label="키워드로 거르기"><button type="button" class="chip" data-kw="스마트공장" aria-pressed="false">스마트공장</button><button type="button" class="chip" data-kw="스마트제조" aria-pressed="false">스마트제조</button></div>
+  <p class="count" id="count" aria-live="polite"></p>
+</div>
+<section class="month"><h2>2026년 11월</h2><ol class="list"><li class="row" data-found="" data-text="스마트공장사업관리시스템중기부누리집" data-kw="스마트공장"><div class="date">11.03<small>2026</small></div><div><a class="title" href="https://www.smart-factory.kr" target="_blank" rel="noopener">스마트공장사업관리시스템</a><div class="meta"><span><b>출처</b><a href="https://www.smart-factory.kr" target="_blank" rel="noopener">중기부 누리집</a></span></div><div class="kw"><span>스마트공장</span></div></div><div class="seal" aria-label="최근 3일 안에 새로 발견">신규</div></li></ol></section><section class="month"><h2>2026년 10월</h2><ol class="list"><li class="row" data-found="" data-text="2027년스마트제조혁신지원사업통합공고제조혁신과중기부누리집" data-kw="스마트제조"><div class="date">10.30<small>2026</small></div><div><a class="title" href="https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=310#view" target="_blank" rel="noopener">2027년 스마트 제조혁신 지원사업 통합공고</a><div class="meta"><span><b>기관</b>제조혁신과</span><span><b>출처</b><a href="https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=310#view" target="_blank" rel="noopener">중기부 누리집</a></span></div><div class="kw"><span>스마트제조</span></div></div><div class="seal" aria-label="최근 3일 안에 새로 발견">신규</div></li></ol></section><div class="empty" id="nomatch" hidden>조건에 맞는 공고가 없습니다. 검색어를 지우거나 키워드 선택을 해제해 보세요.</div>
+<footer>최근 72시간 안에 새로 발견한 공고에는 <b>신규</b> 도장이 찍힙니다. 신청 전에는 반드시 원문 공고를 확인하세요.</footer>
+</div>
+<script>
+(function(){
+  var rows=[].slice.call(document.querySelectorAll('li.row'));
+  var NEW_MS=72*3600*1000, now=Date.now();
+  rows.forEach(function(r){
+    var t=Date.parse(r.dataset.found||'');
+    if(!isNaN(t)&&now-t<NEW_MS){r.classList.add('is-new');}
+  });
+  var q=document.getElementById('q'), chips=[].slice.call(document.querySelectorAll('.chip'));
+  var count=document.getElementById('count'), active=null;
+  function apply(){
+    var term=(q.value||'').replace(/\s+/g,'').toLowerCase(), shown=0;
+    rows.forEach(function(r){
+      var ok=(!term||r.dataset.text.indexOf(term)>-1)&&(!active||r.dataset.kw.split('|').indexOf(active)>-1);
+      r.hidden=!ok; if(ok)shown++;
+    });
+    document.querySelectorAll('section.month').forEach(function(s){
+      s.hidden=!s.querySelector('li.row:not([hidden])');
+    });
+    count.textContent=shown===rows.length?'전체 '+rows.length+'건':rows.length+'건 중 '+shown+'건 표시';
+  }
+  q.addEventListener('input',apply);
+  chips.forEach(function(c){c.addEventListener('click',function(){
+    active=(active===c.dataset.kw)?null:c.dataset.kw;
+    chips.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.kw===active));});
+    apply();
+  });});
+  apply();
+})();
+
+(function(){var n=document.getElementById('nomatch');if(!n)return;var o=new MutationObserver(function(){n.hidden=!!document.querySelector('li.row:not([hidden])');});document.querySelectorAll('li.row').forEach(function(r){o.observe(r,{attributes:true,attributeFilter:['hidden']});});})();
+</script>
+</body>
+</html>
