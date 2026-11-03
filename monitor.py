@@ -571,22 +571,27 @@ def fetch_kosmo(session, board_cfg, match, take_all):
         time.sleep(1)
     tried = [t.replace("https://", "") for t in tried]
     log(f"  {name}: 시도한 주소 {tried}")
+    kid = "kosmo-" + short_hash(board_cfg["url"])[:4]
+    items, dated = [], 0
     if r is not None:
         html = r.text
-        if "login" in str(r.url).lower():
-            log(f"  (진단) {name}: 로그인 화면으로 이동됨 → {r.url}")
-    else:
-        # 일반 접속이 막히면 진짜 크롬으로 다시 시도
+        items, dated = parse_board(html, url, name, kid, match, take_all)
+        if dated == 0:
+            snippet = clean(BeautifulSoup(html, "html.parser").get_text(" "))[:120]
+            scripts = re.findall(r"(?:location(?:\.href)?\s*=|replace\()\s*['\"]([^'\"]+)", html)[:3]
+            log(f"  (진단) {name}: 200 응답이지만 목록 없음 → {_board_diagnose(html)}, 본문 '{snippet}', 이동 지시 {scripts}")
+    if dated == 0:
+        # 일반 접속으로 목록을 못 읽으면 진짜 크롬으로 다시 시도
         html, burl, btried = _kosmo_browser_fetch(
             list(dict.fromkeys([board_cfg["url"], _swap_www(board_cfg["url"])] + menu)), word)
         log(f"  {name}: 브라우저 방식 {btried}")
         if html is None:
-            raise RuntimeError("목록 페이지를 열지 못했습니다(일반 접속·브라우저 접속 모두 실패, " + ", ".join(btried[-2:]) + ")")
+            raise RuntimeError("목록을 읽지 못했습니다(일반 접속·브라우저 접속 모두 실패)")
         url = burl
-    items, dated = parse_board(html, url, name, "kosmo-" + short_hash(board_cfg["url"])[:4], match, take_all)
-    if dated == 0:
-        log(f"  (진단) {name}: {_board_diagnose(html)}")
-        raise RuntimeError("목록에서 공고 줄을 찾지 못했습니다. 화면을 자바스크립트로 그리는 게시판일 수 있습니다.")
+        items, dated = parse_board(html, url, name, kid, match, take_all)
+        if dated == 0:
+            log(f"  (진단) {name}: 브라우저로 연 페이지에도 목록 없음 → {_board_diagnose(html)}")
+            raise RuntimeError("목록에서 공고 줄을 찾지 못했습니다.")
     log(f"  {name}: 게시글 {dated}건 확인")
     if items:
         log(f"  (참고) 첫 게시글: {items[0]['title'][:60]} / {items[0]['posted']} / {items[0]['url'][:80]}")
