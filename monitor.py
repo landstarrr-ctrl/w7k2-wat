@@ -374,10 +374,11 @@ def parse_board(html, base_url, source, id_prefix, match, take_all):
         hits = match(title)
         if not hits and not take_all:
             continue
-        pm = re.search(f"({DATE_RE})\\s*~\\s*({DATE_RE})", text)
+        pm = re.search(f"({DATE_RE})(?:\\s*\\d{{1,2}}:\\d{{2}}(?::\\d{{2}})?)?\\s*~\\s*({DATE_RE})", text)
         period = f"{_ymd(pm.group(1))} ~ {_ymd(pm.group(2))}" if pm else ""
+        pd = re.search(f"(?:공고일자|등록일|작성일)\\s*:?\\s*({DATE_RE})", text)
         rest = [d for d in dates if not pm or d not in (pm.group(1), pm.group(2))]
-        posted = _ymd(rest[-1]) if rest else (_ymd(pm.group(1)) if pm else "")
+        posted = _ymd(pd.group(1)) if pd else (_ymd(rest[-1]) if rest else (_ymd(pm.group(1)) if pm else ""))
         num = re.search(r"(?<!\d)(\d{3,12})(?!\d)", attrs)
         uid = num.group(1) if num else short_hash(title)
         href = (a.get("href") if a is not None else "") or ""
@@ -389,6 +390,7 @@ def parse_board(html, base_url, source, id_prefix, match, take_all):
         items.append({
             "id": f"{id_prefix}:{uid}", "source": source, "title": title, "url": link,
             "org": "", "period": period, "posted": posted, "keywords": hits,
+            "status": next((w for w in ("접수예정", "접수중", "접수마감", "마감") if w in text), ""),
             "ministry": "중소벤처기업부" if "smart-factory.kr" in base_url else "",
         })
     return items, dated
