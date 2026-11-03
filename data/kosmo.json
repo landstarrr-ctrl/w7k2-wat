@@ -1,206 +1,113 @@
 {
  "seen": {
-  "kosmo-a07e:M000000047": "홈|사용자|사업|사업|사업",
-  "kosmo-a07e:M000000497": "홈|사용자|사업|모집|모집",
-  "kosmo-a07e:M000000051": "홈|사용자|사업|맞춤형공급기업검색",
-  "kosmo-8747:M000000045": "홈|사용자|사업",
-  "kosmo-8747:M000000046": "홈|사용자|사업|사업",
-  "kosmo-8747:M000000047": "홈|사용자|사업|사업|사업",
-  "kosmo-8747:M000000496": "홈|사용자|사업|모집",
-  "kosmo-8747:M000000497": "홈|사용자|사업|모집|모집",
-  "kosmo-8747:M000000048": "홈|사용자|사업|지원사업소개",
-  "kosmo-8747:M000000049": "홈|사용자|사업|담당자연락처",
-  "kosmo-8747:M000000051": "홈|사용자|사업|맞춤형공급기업검색",
-  "kosmo-a07e:M000000045": "홈|사용자|사업",
-  "kosmo-a07e:M000000046": "홈|사용자|사업|사업",
-  "kosmo-a07e:M000000496": "홈|사용자|사업|모집",
-  "kosmo-a07e:M000000048": "홈|사용자|사업|지원사업소개",
-  "kosmo-a07e:M000000049": "홈|사용자|사업|담당자연락처"
+  "kosmo-8747:1207": "2027년스마트제조혁신지원사업통합&nbsp;디지털인공지능전환을통한중소중견기업의경쟁력제고를위해2027년스마트제조혁신지원사업을다음과같이사전합니다&nbsp;2026년10월30일중소벤처기업부장관",
+  "kosmo-8747:1204": "k브랜드푸드뷰티스마트제조얼라이언스운영기관모집사업설명회발표자료를공유하오니참고하시기바랍니다&nbsp;",
+  "kosmo-8747:1198": "2026년스마트공장보급확산사업세부관리기준전문2026826개정을&nbsp;&nbsp;첨부와같이게시하오니업무에참고하시기바랍니다",
+  "kosmo-8747:1196": "&nbsp;&nbsp;2026년중소기업스마트서비스지원사업세부관리기준전문2026729개정을&nbsp;&nbsp;첨부와같이게시하오니업무에참고하시기바랍니다",
+  "kosmo-8747:1195": "ai응용제품신속상용화지원사업관련및서식",
+  "kosmo-a07e:1207": "2027년스마트제조혁신지원사업통합&nbsp;디지털인공지능전환을통한중소중견기업의경쟁력제고를위해2027년스마트제조혁신지원사업을다음과같이사전합니다&nbsp;2026년10월30일중소벤처기업부장관",
+  "kosmo-a07e:1204": "k브랜드푸드뷰티스마트제조얼라이언스운영기관모집사업설명회발표자료를공유하오니참고하시기바랍니다&nbsp;",
+  "kosmo-a07e:1198": "2026년스마트공장보급확산사업세부관리기준전문2026826개정을&nbsp;&nbsp;첨부와같이게시하오니업무에참고하시기바랍니다",
+  "kosmo-a07e:1196": "&nbsp;&nbsp;2026년중소기업스마트서비스지원사업세부관리기준전문2026729개정을&nbsp;&nbsp;첨부와같이게시하오니업무에참고하시기바랍니다",
+  "kosmo-a07e:1195": "ai응용제품신속상용화지원사업관련및서식"
  },
  "items": [
   {
-   "id": "kosmo-a07e:M000000045",
+   "id": "kosmo-a07e:1207",
    "source": "KOSMO 사업공고",
-   "title": "홈|사용자|사업안내",
+   "title": "[2027년도 스마트제조혁신 지원사업 통합공고 안내]&nbsp;디지털·인공지능 전환을 통한 중소·중견기업의 경쟁력 제고를 위해 [2027년도 스마트제조혁신 지원사업]을 다음과 같이 사전 안내합니다.&nbsp;2026년 10월 30일중소벤처기업부 장관",
    "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
    "org": "",
    "period": "",
-   "posted": "",
-   "keywords": [],
-   "ministry": "중소벤처기업부",
-   "status": "",
-   "tkey": "홈|사용자|사업",
-   "found_at": "2026-11-03T13:59+09:00",
-   "links": [
-    {
-     "source": "KOSMO 모집공고",
-     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
-    }
-   ],
-   "baseline": true,
-   "groups": [
-    "기타"
-   ]
-  },
-  {
-   "id": "kosmo-a07e:M000000046",
-   "source": "KOSMO 사업공고",
-   "title": "홈|사용자|사업안내|사업공고",
-   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
-   "org": "",
-   "period": "",
-   "posted": "",
-   "keywords": [],
-   "ministry": "중소벤처기업부",
-   "status": "",
-   "tkey": "홈|사용자|사업|사업",
-   "found_at": "2026-11-03T13:59+09:00",
-   "links": [
-    {
-     "source": "KOSMO 모집공고",
-     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
-    }
-   ],
-   "baseline": true,
-   "groups": [
-    "기타"
-   ]
-  },
-  {
-   "id": "kosmo-a07e:M000000047",
-   "source": "KOSMO 사업공고",
-   "title": "홈|사용자|사업안내|사업공고|사업공고",
-   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
-   "org": "",
-   "period": "",
-   "posted": "",
-   "keywords": [],
-   "ministry": "중소벤처기업부",
-   "status": "",
-   "tkey": "홈|사용자|사업|사업|사업",
-   "found_at": "2026-11-03T13:59+09:00",
-   "links": [
-    {
-     "source": "KOSMO 모집공고",
-     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
-    }
-   ],
-   "baseline": true,
-   "groups": [
-    "기타"
-   ]
-  },
-  {
-   "id": "kosmo-a07e:M000000496",
-   "source": "KOSMO 사업공고",
-   "title": "홈|사용자|사업안내|모집공고",
-   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
-   "org": "",
-   "period": "",
-   "posted": "",
-   "keywords": [],
-   "ministry": "중소벤처기업부",
-   "status": "",
-   "tkey": "홈|사용자|사업|모집",
-   "found_at": "2026-11-03T13:59+09:00",
-   "links": [
-    {
-     "source": "KOSMO 모집공고",
-     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
-    }
-   ],
-   "baseline": true,
-   "groups": [
-    "기타"
-   ]
-  },
-  {
-   "id": "kosmo-a07e:M000000497",
-   "source": "KOSMO 사업공고",
-   "title": "홈|사용자|사업안내|모집공고|모집공고",
-   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
-   "org": "",
-   "period": "",
-   "posted": "",
-   "keywords": [],
-   "ministry": "중소벤처기업부",
-   "status": "",
-   "tkey": "홈|사용자|사업|모집|모집",
-   "found_at": "2026-11-03T13:59+09:00",
-   "links": [
-    {
-     "source": "KOSMO 모집공고",
-     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
-    }
-   ],
-   "baseline": true,
-   "groups": [
-    "기타"
-   ]
-  },
-  {
-   "id": "kosmo-a07e:M000000048",
-   "source": "KOSMO 사업공고",
-   "title": "홈|사용자|사업안내|지원사업 소개",
-   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
-   "org": "",
-   "period": "",
-   "posted": "",
-   "keywords": [],
-   "ministry": "중소벤처기업부",
-   "status": "",
-   "tkey": "홈|사용자|사업|지원사업소개",
-   "found_at": "2026-11-03T13:59+09:00",
-   "links": [
-    {
-     "source": "KOSMO 모집공고",
-     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
-    }
-   ],
-   "baseline": true,
-   "groups": [
-    "기타"
-   ]
-  },
-  {
-   "id": "kosmo-a07e:M000000049",
-   "source": "KOSMO 사업공고",
-   "title": "홈|사용자|사업안내|담당자 연락처",
-   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
-   "org": "",
-   "period": "",
-   "posted": "",
-   "keywords": [],
-   "ministry": "중소벤처기업부",
-   "status": "",
-   "tkey": "홈|사용자|사업|담당자연락처",
-   "found_at": "2026-11-03T13:59+09:00",
-   "links": [
-    {
-     "source": "KOSMO 모집공고",
-     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
-    }
-   ],
-   "baseline": true,
-   "groups": [
-    "기타"
-   ]
-  },
-  {
-   "id": "kosmo-a07e:M000000051",
-   "source": "KOSMO 사업공고",
-   "title": "홈|사용자|사업안내|맞춤형 공급기업 검색",
-   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
-   "org": "",
-   "period": "",
-   "posted": "",
+   "posted": "2026-10-30",
    "keywords": [
-    "공급기업"
+    "인공지능·제조",
+    "스마트제조",
+    "제조혁신"
    ],
    "ministry": "중소벤처기업부",
    "status": "",
-   "tkey": "홈|사용자|사업|맞춤형공급기업검색",
-   "found_at": "2026-11-03T13:59+09:00",
+   "tkey": "2027년스마트제조혁신지원사업통합&nbsp;디지털인공지능전환을통한중소중견기업의경쟁력제고를위해2027년스마트제조혁신지원사업을다음과같이사전합니다&nbsp;2026년10월30일중소벤처기업부장관",
+   "found_at": "2026-11-03T14:30+09:00",
+   "links": [
+    {
+     "source": "KOSMO 모집공고",
+     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
+    }
+   ],
+   "baseline": true,
+   "groups": [
+    "제조AI·AX",
+    "스마트공장"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:1204",
+   "source": "KOSMO 사업공고",
+   "title": "K-브랜드(푸드·뷰티) 스마트제조 얼라이언스 운영기관 모집 사업 설명회 발표자료를 공유하오니 참고하시기 바랍니다.&nbsp;",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-10-23",
+   "keywords": [
+    "스마트제조"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "k브랜드푸드뷰티스마트제조얼라이언스운영기관모집사업설명회발표자료를공유하오니참고하시기바랍니다&nbsp;",
+   "found_at": "2026-11-03T14:30+09:00",
+   "links": [
+    {
+     "source": "KOSMO 모집공고",
+     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
+    }
+   ],
+   "baseline": true,
+   "groups": [
+    "스마트공장"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:1198",
+   "source": "KOSMO 사업공고",
+   "title": "2026년 스마트공장 보급확산사업 세부관리기준 전문(2026.8.26. 개정)을&nbsp;&nbsp;첨부와 같이 게시하오니 업무에 참고하시기 바랍니다.",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-09-03",
+   "keywords": [
+    "스마트공장"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "2026년스마트공장보급확산사업세부관리기준전문2026826개정을&nbsp;&nbsp;첨부와같이게시하오니업무에참고하시기바랍니다",
+   "found_at": "2026-11-03T14:30+09:00",
+   "links": [
+    {
+     "source": "KOSMO 모집공고",
+     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
+    }
+   ],
+   "baseline": true,
+   "groups": [
+    "스마트공장"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:1196",
+   "source": "KOSMO 사업공고",
+   "title": "&nbsp;&nbsp;2026년 중소기업 스마트서비스 지원사업 세부관리기준 전문(2026.7.29 개정)을&nbsp;&nbsp;첨부와 같이 게시하오니 업무에 참고하시기 바랍니다.",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-08-14",
+   "keywords": [
+    "스마트서비스"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "&nbsp;&nbsp;2026년중소기업스마트서비스지원사업세부관리기준전문2026729개정을&nbsp;&nbsp;첨부와같이게시하오니업무에참고하시기바랍니다",
+   "found_at": "2026-11-03T14:30+09:00",
    "links": [
     {
      "source": "KOSMO 모집공고",
@@ -211,6 +118,30 @@
    "groups": [
     "데이터·솔루션·R&D"
    ]
+  },
+  {
+   "id": "kosmo-a07e:1195",
+   "source": "KOSMO 사업공고",
+   "title": "AI 응용제품 신속 상용화 지원사업 관련 안내 및 서식",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "2026-08-13",
+   "keywords": [],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "ai응용제품신속상용화지원사업관련및서식",
+   "found_at": "2026-11-03T14:30+09:00",
+   "links": [
+    {
+     "source": "KOSMO 모집공고",
+     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
+    }
+   ],
+   "baseline": true,
+   "groups": [
+    "기타"
+   ]
   }
  ],
  "sources": {
@@ -218,17 +149,18 @@
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T13:59+09:00"
+   "ok_time": "2026-11-03T14:30+09:00"
   },
   "KOSMO 모집공고": {
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T13:59+09:00"
+   "ok_time": "2026-11-03T14:30+09:00"
   }
  },
  "cfg_hash": "17193d8d9f67",
  "dash_hash": "6420823c4472",
  "heartbeat": "2026-11-03",
- "updated": "2026-11-03T13:59+09:00"
+ "updated": "2026-11-03T14:30+09:00",
+ "fix": "kosmo-v2"
 }
