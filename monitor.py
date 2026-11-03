@@ -649,11 +649,15 @@ def _json_lists(o):
             yield from _json_lists(v)
 
 
+BOARD_API = re.compile(r"(bsns|rcrt)pbanc|pbancpage", re.I)
+
+
 def parse_kosmo_json(captured, base_url, source, kid, match, take_all):
-    """크롬이 받아 온 내부 데이터(JSON)에서 공고 목록을 찾습니다. (공고, 진단 문구) 반환."""
-    best, best_score, best_note = [], (0, 0), ""
-    ordered = sorted(captured, key=lambda c: 0 if re.search(r"pbanc|bsns|rcrt|ancm|notice", c[0], re.I) else 1)
-    for api_url, data in ordered:
+    """크롬이 받아 온 내부 데이터(JSON)에서 공고 목록을 찾습니다. (공고, 진단 문구) 반환.
+    게시판 목록 API(…PbancPage.do)를 최우선으로 고릅니다."""
+    best, best_score, best_note, dbg = [], (-1, 0, 0), "", []
+    for api_url, data in captured:
+        pri = 2 if BOARD_API.search(api_url) else (1 if re.search(r"pbanc|ancm", api_url, re.I) else 0)
         for lst in _json_lists(data):
             keys = " ".join(lst[0].keys())
             if re.search(r"menu(Id|Nm|SeCd)|scrnNm|urlAddr|cdNm|codeId", keys, re.I):
@@ -663,14 +667,14 @@ def parse_kosmo_json(captured, base_url, source, kid, match, take_all):
                 strs = {k: str(v) for k, v in d.items() if isinstance(v, (str, int)) and str(v).strip()}
                 tkeys = [k for k in strs if re.search(r"(nm|title|sj|subject|name)$", k, re.I)]
                 pool = [strs[k] for k in tkeys] or list(strs.values())
-                pool = [v for v in pool if 8 <= len(v) <= 200 and re.search("[가-힣]", v)
+                pool = [v for v in pool if 8 <= len(v) <= 250 and re.search("[가-힣]", v)
                         and "|" not in v and not _ymd_any(v)]
                 if not pool:
                     continue
                 title = max(pool, key=len).replace("&nbsp;", " ").replace("\xa0", " ")
-                title = re.sub(r"&[a-z]+;", " ", title)
-                if not re.search("공고|사업|모집|지원|선정|실증|구축", title):
-                    continue
+                title = clean(re.sub(r"&[a-z]+;", " ", title))
+                if pri < 2 and not re.search("공고|사업|모집|지원|선정|실증|구축", title):
+                    continue                  # 게시판 목록 API면 제목 단어 제한 없음
                 dates = {k: _ymd_any(v) for k, v in strs.items() if _ymd_any(v) and len(v) <= 19}
                 begin = next((v for k, v in dates.items() if re.search(r"bgng|begin|start|str|from", k, re.I)), "")
                 end = next((v for k, v in dates.items() if re.search(r"end|clos|ddln|to$", k, re.I)), "")
@@ -682,16 +686,19 @@ def parse_kosmo_json(captured, base_url, source, kid, match, take_all):
                 idk = next((strs[k] for k in strs if re.search(r"(sn|id|no|seq)$", k, re.I)
                             and re.fullmatch(r"[\w\-]{1,30}", strs[k])), "")
                 rows.append({
-                    "id": f"{kid}:{idk or short_hash(title)}", "source": source, "title": clean(title),
+                    "id": f"{kid}:{idk or short_hash(title)}", "source": source, "title": title,
                     "url": base_url, "org": "",
                     "period": f"{begin} ~ {end}" if begin and end else "", "posted": posted,
                     "keywords": match(title), "ministry": "중소벤처기업부", "status": "",
                 })
-            score = (dated_rows, len(rows))
+            if rows:
+                dbg.append(f"{api_url.split('?')[0].replace('https://', '')[-45:]}:{len(rows)}건")
+            score = (pri, dated_rows, len(rows))
             if rows and score > best_score:
                 best, best_score = rows, score
-                sample = rows[0]["title"][:30]
-                best_note = f"{api_url.split('?')[0].replace('https://', '')[-55:]}, 예시 '{sample}'"
+                best_note = f"{api_url.split('?')[0].replace('https://', '')[-55:]}, 예시 '{rows[0]['title'][:30]}'"
+    if dbg:
+        best_note += f" / 후보 {dbg[:5]}"
     if not take_all:
         best = [r for r in best if r["keywords"]]
     return best, best_note
@@ -1179,9 +1186,9 @@ def run(cfg, dry_run=False, only=None) -> int:
     dup_links: list[tuple[str, dict]] = []
 
     # 한 번만 실행: 예전 버전의 오류 정리 후 중기부 게시판을 조용히 다시 기록
-    if pc_mode and state.get("fix") != "kosmo-v3":
+    if pc_mode and state.get("fix") != "kosmo-v4":
         n = len(state["items"])
-        state.update({"items": [], "seen": {}, "sources": {}, "fix": "kosmo-v3"})
+        state.update({"items": [], "seen": {}, "sources": {}, "fix": "kosmo-v4"})
         changed = True
         if n:
             log(f"KOSMO 기록 정리: 잘못 수집된 {n}건을 지우고 다시 확인합니다.")
