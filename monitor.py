@@ -471,7 +471,7 @@ def _kosmo_browser_fetch(urls, word):
         from playwright.sync_api import sync_playwright
     except ImportError:
         return None, None, ["브라우저 도구(playwright) 없음"], []
-    tried, captured = [], []
+    tried, captured, fallback = [], [], {}
 
     def on_response(resp):
         try:
@@ -491,9 +491,12 @@ def _kosmo_browser_fetch(urls, word):
         except Exception:  # noqa: BLE001
             pass
         try:
-            page.wait_for_selector("text=접수기간", timeout=12000)
+            page.wait_for_selector("text=접수기간", timeout=15000)
         except Exception:  # noqa: BLE001
-            page.wait_for_timeout(3000)
+            try:
+                page.wait_for_selector("text=공고일자", timeout=5000)
+            except Exception:  # noqa: BLE001
+                page.wait_for_timeout(3000)
 
     modes = [
         ("화면 있는 크롬", {"channel": "chrome", "headless": False,
@@ -540,8 +543,10 @@ def _kosmo_browser_fetch(urls, word):
                         html = page.content()
                         status = resp.status if resp else 0
                         tried.append(f"{label}/{step} {u.replace('https://', '')} → {status}")
-                        if status == 200 and ("접수기간" in html or "공고일자" in html or captured):
+                        if status == 200 and ("접수기간" in html or "공고일자" in html):
                             return html, u, tried, captured
+                        if status == 200 and captured and not fallback:
+                            fallback = {"html": html, "url": u}
                 # 마지막: 첫 화면 메뉴 글자를 눌러 들어가기
                 try:
                     page.goto(KOSMO_HOME, wait_until="domcontentloaded", timeout=45000)
@@ -550,12 +555,18 @@ def _kosmo_browser_fetch(urls, word):
                     settle(page)
                     html = page.content()
                     tried.append(f"{label}/메뉴 '{word}' 클릭 → {page.url.replace('https://', '')}")
-                    if "접수기간" in html or "공고일자" in html or captured:
+                    if "접수기간" in html or "공고일자" in html:
                         return html, page.url, tried, captured
+                    if captured and not fallback:
+                        fallback = {"html": html, "url": page.url}
                 except Exception as e:  # noqa: BLE001
                     tried.append(f"{label}/메뉴 클릭 실패: {type(e).__name__}")
             finally:
                 browser.close()
+            if fallback:
+                break
+    if fallback:
+        return fallback["html"], fallback["url"], tried, captured
     return None, None, tried, captured
 
 
@@ -625,34 +636,46 @@ def _json_lists(o):
 
 def parse_kosmo_json(captured, base_url, source, kid, match, take_all):
     """크롬이 받아 온 내부 데이터(JSON)에서 공고 목록을 찾습니다. (공고, 진단 문구) 반환."""
-    best, best_note = [], ""
-    for api_url, data in captured:
+    best, best_score, best_note = [], (0, 0), ""
+    ordered = sorted(captured, key=lambda c: 0 if re.search(r"pbanc|bsns|rcrt|ancm|notice", c[0], re.I) else 1)
+    for api_url, data in ordered:
         for lst in _json_lists(data):
-            rows = []
-            for d in lst:
+            keys = " ".join(lst[0].keys())
+            if re.search(r"menu(Id|Nm|SeCd)|scrnNm|urlAddr|cdNm|codeId", keys, re.I):
+                continue                      # 사이트 메뉴·코드 목록은 공고가 아님
+            rows, dated_rows = [], 0
+            for d in lst[:200]:
                 strs = {k: str(v) for k, v in d.items() if isinstance(v, (str, int)) and str(v).strip()}
                 tkeys = [k for k in strs if re.search(r"(nm|title|sj|subject|name)$", k, re.I)]
                 pool = [strs[k] for k in tkeys] or list(strs.values())
-                pool = [v for v in pool if len(v) >= 8 and re.search("[가-힣]", v) and not _ymd_any(v)]
+                pool = [v for v in pool if 8 <= len(v) <= 200 and re.search("[가-힣]", v)
+                        and "|" not in v and not _ymd_any(v)]
                 if not pool:
                     continue
                 title = max(pool, key=len)
-                if not re.search("공고|사업|모집|지원|선정|안내", title):
+                if not re.search("공고|사업|모집|지원|선정|실증|구축", title):
                     continue
                 dates = {k: _ymd_any(v) for k, v in strs.items() if _ymd_any(v) and len(v) <= 19}
-                begin = next((v for k, v in dates.items() if re.search(r"bgng|begin|start|str|from|rcpt.*b", k, re.I)), "")
-                end = next((v for k, v in dates.items() if re.search(r"end|clos|ddln|to$|rcpt.*e", k, re.I)), "")
-                posted = next((v for k, v in dates.items() if re.search(r"reg|crt|pbanc|ntce|ntc|wrt|rgst|pst", k, re.I)), "")
+                begin = next((v for k, v in dates.items() if re.search(r"bgng|begin|start|str|from", k, re.I)), "")
+                end = next((v for k, v in dates.items() if re.search(r"end|clos|ddln|to$", k, re.I)), "")
+                posted = next((v for k, v in dates.items() if re.search(r"reg|crt|pbanc.*d|ntce|ntc|wrt|rgst|pst", k, re.I)), "")
                 posted = posted or (sorted(dates.values())[0] if dates else "")
-                idk = next((strs[k] for k in strs if re.search(r"(sn|id|no|seq)$", k, re.I) and re.fullmatch(r"[\w\-]{1,30}", strs[k])), "")
+                if not (posted or (begin and end)):
+                    continue                  # 날짜가 전혀 없으면 공고로 보지 않음
+                dated_rows += 1
+                idk = next((strs[k] for k in strs if re.search(r"(sn|id|no|seq)$", k, re.I)
+                            and re.fullmatch(r"[\w\-]{1,30}", strs[k])), "")
                 rows.append({
-                    "id": f"{kid}:{idk or short_hash(title)}", "source": source, "title": clean(title), "url": base_url,
-                    "org": "", "period": f"{begin} ~ {end}" if begin and end else "", "posted": posted,
+                    "id": f"{kid}:{idk or short_hash(title)}", "source": source, "title": clean(title),
+                    "url": base_url, "org": "",
+                    "period": f"{begin} ~ {end}" if begin and end else "", "posted": posted,
                     "keywords": match(title), "ministry": "중소벤처기업부", "status": "",
                 })
-            if len(rows) > len(best):
-                best = rows
-                best_note = f"{api_url.split('?')[0][-60:]} 항목 키 {list(lst[0].keys())[:12]}"
+            score = (dated_rows, len(rows))
+            if rows and score > best_score:
+                best, best_score = rows, score
+                sample = rows[0]["title"][:30]
+                best_note = f"{api_url.split('?')[0].replace('https://', '')[-55:]}, 예시 '{sample}'"
     if not take_all:
         best = [r for r in best if r["keywords"]]
     return best, best_note
@@ -1140,6 +1163,13 @@ def run(cfg, dry_run=False, only=None) -> int:
     dup_links: list[tuple[str, dict]] = []
 
     # 한 번만 실행: 예전 버전의 오류 정리 후 중기부 게시판을 조용히 다시 기록
+    if pc_mode and state.get("fix") != "kosmo-v2":
+        n = len(state["items"])
+        state.update({"items": [], "seen": {}, "sources": {}, "fix": "kosmo-v2"})
+        changed = True
+        if n:
+            log(f"KOSMO 기록 정리: 잘못 수집된 {n}건을 지우고 다시 확인합니다.")
+
     if not pc_mode and state.get("fix") != "mss-v3":
         state["items"] = [it for it in state["items"]
                           if not (it["id"].startswith("mss:") and not it.get("posted"))]
