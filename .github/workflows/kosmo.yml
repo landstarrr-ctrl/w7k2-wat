@@ -1,0 +1,66 @@
+name: KOSMO 감시 (사무실 PC)
+
+# 사무실 PC(국내)에 설치한 GitHub 실행기에서만 돌아갑니다.
+# PC가 꺼져 있으면 실행되지 않고, 대시보드에 KOSMO 바로가기 안내가 뜹니다.
+on:
+  schedule:
+    - cron: "12,42 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kosmo-pc
+  cancel-in-progress: false
+
+jobs:
+  kosmo:
+    runs-on: [self-hosted, Windows]
+    timeout-minutes: 20
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      MAIL_TO: ${{ secrets.MAIL_TO }}
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      PYTHONUTF8: "1"
+    defaults:
+      run:
+        shell: powershell
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 파이썬 환경 준비
+        run: |
+          $ErrorActionPreference = 'Continue'
+          $venv = Join-Path $env:RUNNER_WORKSPACE "venv-gonggo"
+          if (-not (Test-Path "$venv\Scripts\python.exe")) { python -m venv $venv }
+          & "$venv\Scripts\python.exe" -m pip install --quiet --disable-pip-version-check -r requirements.txt
+          exit $LASTEXITCODE
+
+      - name: KOSMO 확인
+        run: |
+          $venv = Join-Path $env:RUNNER_WORKSPACE "venv-gonggo"
+          & "$venv\Scripts\python.exe" monitor.py --only kosmo
+          exit $LASTEXITCODE
+
+      - name: 변경 사항 저장
+        run: |
+          $ErrorActionPreference = 'Continue'
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/kosmo.json
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m "KOSMO 갱신 (사무실 PC)"
+            for ($i = 0; $i -lt 3; $i++) {
+              git pull --rebase --autostash
+              git push
+              if ($LASTEXITCODE -eq 0) { break }
+              Start-Sleep -Seconds 5
+            }
+          }
+          exit 0
