@@ -50,6 +50,14 @@ header p{margin:0;color:var(--muted);max-width:60ch}
   font-size:14px;color:var(--muted)}
 .status img{height:20px;vertical-align:middle}
 .status .bad{color:var(--seal)}
+li.row{padding-right:46px}
+.fav{position:absolute;right:8px;top:8px;background:none;border:none;cursor:pointer;
+  font-size:21px;line-height:1;color:var(--muted);padding:6px;border-radius:8px}
+.fav:hover{background:var(--sheet)}
+.fav.on{color:#F2A91E}
+li.is-closed .fav{opacity:.6}
+.favlab{color:#C98A00;font-weight:600}
+:root[data-theme="dark"] .favlab{color:#F2C14E}
 .meta a.khelp{text-decoration:underline dotted;text-underline-offset:3px;cursor:help}
 .minilegend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:10px 0 0;font-size:12px;color:var(--muted)}
 .minilegend .lg{display:inline-flex;align-items:center;gap:6px}
@@ -168,17 +176,34 @@ JS = """
   });
   var q=document.getElementById('q'), tabs=[].slice.call(document.querySelectorAll('.tab'));
   var hide=document.getElementById('hideClosed'), count=document.getElementById('count');
+  var favOnly=document.getElementById('favOnly');
+  var favs={};
+  try{(JSON.parse(localStorage.getItem('favs')||'[]')).forEach(function(k){favs[k]=1;});}catch(e){}
+  function favSave(){try{localStorage.setItem('favs',JSON.stringify(Object.keys(favs)));}catch(e){}}
+  rows.forEach(function(r){
+    var btn=r.querySelector('.fav'); if(!btn) return;
+    function paint(){var on=!!favs[r.dataset.fid];
+      btn.textContent=on?'\u2605':'\u2606';btn.classList.toggle('on',on);
+      btn.setAttribute('aria-pressed',String(on));
+      btn.title=on?'관심 공고에서 빼기':'관심 공고로 저장';}
+    paint();
+    btn.addEventListener('click',function(){
+      if(favs[r.dataset.fid])delete favs[r.dataset.fid];else favs[r.dataset.fid]=1;
+      favSave();paint();apply();});
+  });
   var empty=document.getElementById('nomatch');
   var active=decodeURIComponent((location.hash||'').slice(1));
   if(!tabs.some(function(t){return t.dataset.g===active;})) active='';
   try{ if(localStorage.getItem('hideClosed')==='1') hide.checked=true; }catch(e){}
+  try{ if(localStorage.getItem('favOnly')==='1') favOnly.checked=true; }catch(e){}
   function apply(){
     var term=(q.value||'').replace(/\\s+/g,'').toLowerCase(), shown=0;
     tabs.forEach(function(t){t.setAttribute('aria-selected',String(t.dataset.g===active));});
     rows.forEach(function(r){
       var ok=(!active||r.dataset.groups.split('|').indexOf(active)>-1)
         &&(!term||r.dataset.text.indexOf(term)>-1)
-        &&!(hide.checked&&r.classList.contains('is-closed'));
+        &&!(hide.checked&&r.classList.contains('is-closed'))
+        &&(!favOnly.checked||favs[r.dataset.fid]);
       r.hidden=!ok; if(ok)shown++;
     });
     document.querySelectorAll('section.month').forEach(function(s){
@@ -195,6 +220,10 @@ JS = """
   q.addEventListener('input',apply);
   hide.addEventListener('change',function(){
     try{localStorage.setItem('hideClosed',hide.checked?'1':'0');}catch(e){}
+    apply();
+  });
+  favOnly.addEventListener('change',function(){
+    try{localStorage.setItem('favOnly',favOnly.checked?'1':'0');}catch(e){}
     apply();
   });
   window.addEventListener('hashchange',function(){
@@ -287,7 +316,7 @@ def _row(it) -> str:
         src.append(_a(l["url"], l["source"]))
     meta.append(f"<span><b>출처</b>{', '.join(src)}</span>")
     return (
-        f'<li class="row m-{mcls}" data-found="{"" if it.get("baseline") else E(it.get("found_at", ""), quote=True)}" '
+        f'<li class="row m-{mcls}" data-fid="{E(it.get("tkey") or it["id"], quote=True)}" data-found="{"" if it.get("baseline") else E(it.get("found_at", ""), quote=True)}" '
         f'data-text="{E(text, quote=True)}" data-groups="{E("|".join(groups), quote=True)}" '
         f'data-start="{E(start, quote=True)}" data-end="{E(end, quote=True)}" '
         f'data-status="{E(it.get("status", ""), quote=True)}">'
@@ -298,7 +327,7 @@ def _row(it) -> str:
         f'<a class="title" {"title=" + chr(34) + E(KOSMO_TIP, quote=True) + chr(34) + " " if "smart-factory.kr" in it["url"] else ""}href="{E(_fix_url(it["url"]), quote=True)}" target="_blank" rel="noopener">{E(it["title"])}</a>'
         f'<div class="meta">{"".join(meta)}</div>'
         f'<div class="kw">{"".join(f"<span>{E(k)}</span>" for k in kws)}</div></div>'
-        f'</li>'
+        f'<button class="fav" type="button" aria-pressed="false" aria-label="관심 공고로 저장" title="관심 공고로 저장">☆</button></li>'
     )
 
 
@@ -397,9 +426,10 @@ def render(*, title, items, groups, sources, updated, repo, new_hours, now, kosm
   <input id="q" class="search" type="search" placeholder="공고명·기관·출처(KOSMO, IRIS…)로 찾기" aria-label="공고 검색(공고명, 기관, 출처)">
   <div class="tabs" role="tablist" aria-label="분류">{tabs_html}</div>
   <div class="opts"><label class="opts"><input type="checkbox" id="hideClosed">마감된 공고 숨기기</label>
+    <label class="opts"><input type="checkbox" id="favOnly"><span class="favlab">★ 관심만 보기</span></label>
     <span id="count" aria-live="polite" style="margin-left:auto"></span></div>
 </div>
-<p class="legend"><b>신규</b> 표시는 이 감시 봇이 최근 {new_hours}시간 안에 처음 발견한 공고에 붙습니다(감시를 처음 시작할 때 이미 올라와 있던 공고는 제외). <b class="hot">마감 임박</b>은 접수 마감까지 14일 이내 남은 공고입니다. 신청 전에는 반드시 원문 공고를 확인하세요.</p>
+<p class="legend"><b>신규</b> 표시는 이 감시 봇이 최근 {new_hours}시간 안에 처음 발견한 공고에 붙습니다(감시를 처음 시작할 때 이미 올라와 있던 공고는 제외). <b class="hot">마감 임박</b>은 접수 마감까지 14일 이내 남은 공고입니다. 공고 오른쪽의 <b>☆</b>를 누르면 관심 공고로 저장되어 '★ 관심만 보기'로 모아 볼 수 있습니다(지금 쓰는 브라우저에만 저장). 신청 전에는 반드시 원문 공고를 확인하세요.</p>
 {body}
 </div>
 <script>
