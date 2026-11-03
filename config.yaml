@@ -129,10 +129,10 @@ sources:
     - name: 로봇산업진흥원 사업공고
       enabled: true
       ministry: 산업통상자원부
-      url: https://www.kiria.org/portal/notice/portalBizNotice.do
+      url: https://kiria.org/portal/info/portalInfoBusinessList.do
       alt_urls:
-        - https://www.kiria.org/portal/board/boardList.do?bbsId=BIZ
-        - https://pms.kiria.org/main/board/notice.do
+        - https://kiria.org/portal/info/portalInfoBusinessList.do?pageIndex=1&recordCountPerPage=30
+        - https://www.kiria.org/portal/info/portalInfoBusinessList.do
 
   # run_on: github → GitHub 서버가 다른 출처와 함께 확인 (기본 추천)
   #        pc     → 사무실 PC 실행기에서만 확인, 대시보드는 PC 소식이
