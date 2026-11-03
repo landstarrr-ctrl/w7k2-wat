@@ -191,12 +191,25 @@ def fetch_mss(session, cfg, match):
         hits = match(title)
         if not hits:
             continue
-        attrs = f"{a.get('href') or ''} {a.get('onclick') or ''}"
-        m = re.search(r"bcIdx=(\d+)", attrs) or re.search(r"['\"](\d{6,})['\"]", attrs)
-        if not m:
-            continue  # 게시글 번호가 없는 링크(메뉴·배너·관련 사이트)는 공고가 아님
-        bid = m.group(1)
-        link = MSS_VIEW.format(id=bid)
+        href = a.get("href") or ""
+        # 다른 사이트로 나가는 링크(관련 사이트·배너)는 공고가 아님
+        if href.startswith("http") and "mss.go.kr" not in href:
+            continue
+        details = _row_details(a)
+        # 게시글 줄에는 등록일이 있음. 날짜 없는 링크(메뉴·바로가기)는 건너뜀
+        if not details["posted"]:
+            continue
+        attrs = " ".join(str(v) for v in a.attrs.values())
+        m = re.search(r"bcIdx=(\d+)", attrs)
+        if m:
+            bid = m.group(1)
+            link = MSS_VIEW.format(id=bid)
+        else:
+            num = re.search(r"(?<!\d)(\d{6,9})(?!\d)", attrs)
+            bid = num.group(1) if num else short_hash(title)
+            usable = href and not href.startswith("#") and not href.lower().startswith("javascript")
+            link = urljoin(list_url, href) if usable else list_url
+            log(f"  (참고) 게시글 링크 형태: {str(a)[:200]}")
         if bid in seen:
             continue
         seen.add(bid)
@@ -206,7 +219,7 @@ def fetch_mss(session, cfg, match):
             "title": title,
             "url": link,
             "keywords": hits,
-            **_row_details(a),
+            **details,
         })
     return items
 
@@ -225,7 +238,7 @@ def fetch_page(session, page, match):
         if not hits:
             continue
         href = a.get("href") or ""
-        usable = href and href != "#" and not href.lower().startswith("javascript")
+        usable = href and not href.startswith("#") and not href.lower().startswith("javascript")
         link = urljoin(url, href) if usable else url
         uid = short_hash(page["name"], title, link)
         if uid in seen:
@@ -431,13 +444,17 @@ def run(cfg, dry_run=False) -> int:
     run_keys: dict[str, dict] = {}  # 이번 실행에서 처음 본 제목 키 -> 공고
     dup_links: list[tuple[str, dict]] = []
 
-    # 예전 버전이 게시글이 아닌 메뉴 링크를 공고로 잘못 기록한 것을 정리
-    before = len(state["items"])
-    state["items"] = [it for it in state["items"]
-                      if not (it["id"].startswith("mss:") and not it["id"][4:].isdigit())]
-    if len(state["items"]) != before:
+    # 한 번만 실행: 예전 버전의 오류 정리 후 중기부 게시판을 조용히 다시 기록
+    if state.get("fix") != "mss-v3":
+        state["items"] = [it for it in state["items"]
+                          if not (it["id"].startswith("mss:") and not it.get("posted"))]
+        kept = {it["id"] for it in state["items"]}
+        state["seen"] = {k: v for k, v in state["seen"].items()
+                         if not k.startswith("mss:") or k in kept}
+        state["sources"].setdefault("중기부 누리집", {})["initialized"] = False
+        state["fix"] = "mss-v3"
         changed = True
-        log(f"잘못 기록된 항목 {before - len(state['items'])}건을 정리했습니다.")
+        log("중기부 게시판 기록을 정리하고 다시 확인합니다.")
 
     existing_by_key = {it.get("tkey"): it for it in state["items"] if it.get("tkey")}
 
