@@ -1,6 +1,7 @@
 """docs/index.html 대시보드를 만듭니다. monitor.py에서 불러 씁니다."""
 from __future__ import annotations
 
+import datetime
 import html
 import json
 import re
@@ -35,6 +36,7 @@ body{background:var(--paper);color:var(--ink);
 header h1{font-size:30px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin:0 0 8px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;
   padding-bottom:12px;border-bottom:1px solid var(--rule)}
+.credit{margin-left:auto;margin-right:12px;font-size:12px;color:var(--muted);opacity:.55;white-space:nowrap}
 .clock{font-variant-numeric:tabular-nums;font-size:14px;color:var(--muted);letter-spacing:.01em}
 .clock b{color:var(--ink);font-weight:600;margin-left:6px}
 .theme{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;padding:0;
@@ -256,6 +258,20 @@ def _month_label(ym: str) -> str:
 KOSMO_TIP = "공고별 주소가 없는 사이트라 게시판 목록이 열립니다 - 공고번호·제목으로 찾아 주세요"
 
 
+_WD = "월화수목금토일"
+
+
+def _add_weekday(text: str) -> str:
+    """날짜 뒤에 (요일)을 붙입니다. 예: 2026-11-02 → 2026-11-02(월)"""
+    def rep(m):
+        try:
+            d = datetime.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+            return f"{m.group(0)}({_WD[d.weekday()]})"
+        except ValueError:
+            return m.group(0)
+    return re.sub(r"(\d{4})-(\d{2})-(\d{2})", rep, text)
+
+
 def _fix_url(u: str) -> str:
     return (u or "").replace("https://smart-factory.kr/", "https://www.smart-factory.kr/")
 
@@ -281,7 +297,7 @@ def _row(it) -> str:
     if it.get("org"):
         meta.append(f"<span><b>기관</b>{E(it['org'])}</span>")
     if it.get("period"):
-        meta.append(f"<span><b>신청</b>{E(it['period'])}</span>")
+        meta.append(f"<span><b>신청</b>{E(_add_weekday(it['period']))}</span>")
     if it.get("notice_no"):
         meta.append(f"<span><b>공고번호</b>{E(it['notice_no'])}</span>")
     src = [f'<a href="{E(_fix_url(it["url"]), quote=True)}" target="_blank" rel="noopener">{E(it["source"])}</a>']
@@ -384,6 +400,7 @@ def render(*, title, items, groups, sources, updated, repo, new_hours, now, kosm
 <div class="wrap">
 <div class="top">
   <div class="clock" aria-live="off">현재 시각<b id="clock">-</b></div>
+  <span class="credit">제작 : 정지성 부장</span>
   <button type="button" class="theme" id="themeBtn" aria-label="다크 모드로 바꾸기" title="다크 모드로 바꾸기">
     <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
     <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
