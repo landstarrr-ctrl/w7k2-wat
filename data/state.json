@@ -1237,18 +1237,18 @@
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T14:58+09:00"
+   "ok_time": "2026-11-03T15:48+09:00"
   },
   "KOSMO 모집공고": {
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T14:58+09:00"
+   "ok_time": "2026-11-03T15:48+09:00"
   }
  },
  "heartbeat": "2026-11-03",
- "updated": "2026-11-03T15:42+09:00",
+ "updated": "2026-11-03T15:48+09:00",
  "fix": "mss-v3",
  "cfg_hash": "17193d8d9f67",
- "dash_hash": "aa80980bd4d5"
+ "dash_hash": "203047b50278"
 }
