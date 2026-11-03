@@ -1,0 +1,20 @@
+{
+ "seen": {},
+ "items": [],
+ "sources": {
+  "KOSMO 사업공고": {
+   "initialized": false,
+   "fails": 1,
+   "error": "목록에서 공고 줄을 찾지 못했습니다. 화면을 자바스크립트로 그리는 게시판일 수 있습니다."
+  },
+  "KOSMO 모집공고": {
+   "initialized": false,
+   "fails": 1,
+   "error": "목록에서 공고 줄을 찾지 못했습니다. 화면을 자바스크립트로 그리는 게시판일 수 있습니다."
+  }
+ },
+ "cfg_hash": "17193d8d9f67",
+ "dash_hash": "6420823c4472",
+ "heartbeat": "2026-11-03",
+ "updated": "2026-11-03T13:48+09:00"
+}
