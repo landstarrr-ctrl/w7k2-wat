@@ -244,7 +244,7 @@ def _date_parts(it):
     d = (it.get("posted") or it.get("found_at", ""))[:10]
     if len(d) == 10:
         return d[:7], f"{d[5:7]}.{d[8:10]}", d[:4]
-    return "날짜 미상", "—", ""
+    return "날짜 미상", "-", ""
 
 
 def _month_label(ym: str) -> str:
@@ -253,7 +253,7 @@ def _month_label(ym: str) -> str:
     return ym
 
 
-KOSMO_TIP = "공고별 주소가 없는 사이트라 게시판 목록이 열립니다 — 공고번호·제목으로 찾아 주세요"
+KOSMO_TIP = "공고별 주소가 없는 사이트라 게시판 목록이 열립니다 - 공고번호·제목으로 찾아 주세요"
 
 
 def _fix_url(u: str) -> str:
@@ -383,7 +383,7 @@ def render(*, title, items, groups, sources, updated, repo, new_hours, now, kosm
 <body>
 <div class="wrap">
 <div class="top">
-  <div class="clock" aria-live="off">현재 시각<b id="clock">—</b></div>
+  <div class="clock" aria-live="off">현재 시각<b id="clock">-</b></div>
   <button type="button" class="theme" id="themeBtn" aria-label="다크 모드로 바꾸기" title="다크 모드로 바꾸기">
     <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
     <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
