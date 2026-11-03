@@ -704,6 +704,49 @@ def parse_kosmo_json(captured, base_url, source, kid, match, take_all):
     return best, best_note
 
 
+def _kosmo_api_candidates(board_url: str):
+    """게시판 화면이 쓰는 목록 데이터 주소를 만들어 봅니다. (예: …/bsnsPbanc/selectBsnsPbancPage.do)"""
+    seg = board_url.rstrip("/").split("/")[-1].split("?")[0].replace(".do", "")
+    ep = f"{board_url.rstrip('/')}/select{seg[0].upper()}{seg[1:]}Page.do"
+    return list(dict.fromkeys([ep, _swap_www(ep)]))
+
+
+def _kosmo_api_fetch(client, board_cfg, match, take_all, kid):
+    """크롬 없이 목록 데이터 주소를 직접 불러 봅니다. (공고목록, 기록) 반환."""
+    name = board_cfg["name"]
+    hdr = {"Accept": "application/json, text/plain, */*", "Referer": board_cfg["url"],
+           "X-Requested-With": "XMLHttpRequest"}
+    bodies = [("GET", None, None),
+              ("POST", {"json": {}}, "빈 JSON"),
+              ("POST", {"json": {"pageIndex": 1, "currentPageNo": 1, "pageUnit": 20, "recordCountPerPage": 20,
+                                 "searchCnd": "", "searchWrd": ""}}, "쪽수 JSON"),
+              ("POST", {"data": {"pageIndex": "1", "currentPageNo": "1", "recordCountPerPage": "20"}}, "쪽수 폼")]
+    tried = []
+    for ep in _kosmo_api_candidates(board_cfg["url"]):
+        for method, kw, label in bodies:
+            try:
+                r = (client.get(ep, timeout=30, headers=hdr) if method == "GET"
+                     else client.post(ep, timeout=30, headers=hdr, **(kw or {})))
+            except Exception as e:  # noqa: BLE001
+                tried.append(f"{method} {ep.replace('https://', '')} → {type(e).__name__}")
+                continue
+            note = f"({label})" if label else ""
+            tried.append(f"{method}{note} {ep.replace('https://', '')} → {r.status_code}")
+            if r.status_code != 200:
+                continue
+            try:
+                data = r.json()
+            except Exception:  # noqa: BLE001
+                tried.append("  응답이 JSON 아님")
+                continue
+            items, jnote = parse_kosmo_json([(ep, data)], board_cfg["url"], name, kid, match, take_all)
+            if items:
+                log(f"  {name}: 내부 주소에서 바로 읽음 {len(items)}건 ({jnote})")
+                return items, tried
+            tried.append("  JSON에 공고 목록 없음")
+    return None, tried
+
+
 def fetch_kosmo(session, board_cfg, match, take_all):
     url = board_cfg["url"]
     name = board_cfg["name"]
@@ -722,6 +765,12 @@ def fetch_kosmo(session, board_cfg, match, take_all):
             except Exception as e:  # noqa: BLE001
                 log(f"  KOSMO: 첫 화면 {home_url} 접속 실패 {type(e).__name__}")
     word = "모집공고" if "모집" in name else "사업공고"
+    kid = "kosmo-" + short_hash(board_cfg["url"])[:4]
+    api_items, api_tried = _kosmo_api_fetch(client, board_cfg, match, take_all, kid)
+    log(f"  {name}: 내부 주소 시도 {api_tried[:6]}")
+    if api_items:
+        log(f"  (참고) 첫 게시글: {api_items[0]['title'][:60]} / {api_items[0]['posted']}")
+        return api_items
     menu = _home_links(_KOSMO["home"], word)
     if menu:
         log(f"  {name}: 첫 화면 메뉴에서 찾은 주소 {[m.split('smart-factory.kr')[-1] for m in menu][:5]}")
@@ -740,7 +789,6 @@ def fetch_kosmo(session, board_cfg, match, take_all):
         time.sleep(1)
     tried = [t.replace("https://", "") for t in tried]
     log(f"  {name}: 시도한 주소 {tried}")
-    kid = "kosmo-" + short_hash(board_cfg["url"])[:4]
     items, dated = [], 0
     if r is not None:
         html = r.text
