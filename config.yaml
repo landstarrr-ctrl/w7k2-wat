@@ -123,6 +123,14 @@ sources:
       enabled: true
       ministry: 중소벤처기업부
       url: https://www.smtech.go.kr/front/ifg/no/notice02_list.do
+      detail:   # 목록의 코드로 공고 상세 주소를 만듦
+        url: "https://www.smtech.go.kr/front/ifg/no/notice02_detail.do?buclYy=&ancmId={ancmId}&buclCd={buclCd}&dtlAncmSn={dtlAncmSn}&schdSe=MO5005&aplySn={aplySn}&searchCondition=&searchKeyword=&pageIndex=1"
+        fields:
+          ancmId: "(?<![0-9A-Za-z])S\\d{5}(?![0-9A-Za-z])"
+          buclCd: "(?<![0-9A-Za-z])S[0-9A-Z]{4}(?![0-9A-Za-z])"
+        defaults:
+          dtlAncmSn: "1"
+          aplySn: "1"
       alt_urls:
         - https://www.smtech.go.kr/front/ifg/no/notice02_list.do?searchCondition=&searchKeyword=
         - https://smtech.go.kr/front/ifg/no/notice02_list.do
@@ -130,6 +138,10 @@ sources:
       enabled: true
       ministry: 산업통상자원부
       url: https://kiria.org/portal/info/portalInfoBusinessList.do
+      detail:
+        url: "https://kiria.org/portal/info/portalInfoBusinessWrite.do?ibusCode={ibusCode}&mode=update"
+        fields:
+          ibusCode: "IBUS_\\d+"
       alt_urls:
         - https://kiria.org/portal/info/portalInfoBusinessList.do?pageIndex=1&recordCountPerPage=30
         - https://www.kiria.org/portal/info/portalInfoBusinessList.do

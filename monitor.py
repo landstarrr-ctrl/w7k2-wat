@@ -338,7 +338,7 @@ def _board_diagnose(html: str) -> str:
             f"스크립트 주소 단서 {hints}")
 
 
-def parse_board(html, base_url, source, id_prefix, match, take_all):
+def parse_board(html, base_url, source, id_prefix, match, take_all, detail=None):
     """날짜가 있는 줄을 게시글로 보고 제목·기간·등록일을 뽑습니다."""
     soup = BeautifulSoup(html, "html.parser")
     rows = soup.select("tbody tr") or soup.find_all(["tr", "li"])
@@ -385,6 +385,17 @@ def parse_board(html, base_url, source, id_prefix, match, take_all):
         href = (a.get("href") if a is not None else "") or ""
         usable = href and not href.startswith("#") and not href.lower().startswith("javascript")
         link = urljoin(base_url, href) if usable else base_url
+        if detail and not usable:
+            hay = attrs + " " + " ".join(str(v) for v in row.attrs.values())
+            vals = dict(detail.get("defaults") or {})
+            for k, rx in (detail.get("fields") or {}).items():
+                m2 = re.search(rx, hay)
+                if m2:
+                    vals[k] = m2.group(1) if m2.groups() else m2.group(0)
+            try:
+                link = detail["url"].format(**vals)
+            except (KeyError, IndexError):
+                pass                      # 필요한 코드를 못 찾으면 게시판 링크 유지
         if uid in seen:
             continue
         seen.add(uid)
@@ -968,10 +979,15 @@ def fetch_board(session, b, match):
             t = BeautifulSoup(txt or "", "html.parser").title
             tried.append(f"{u.replace('https://', '')} → {code}({clean(t.get_text()) if t else '제목 없음'})")
             continue
-        items, dated = parse_board(txt, u, name, kid, match, take_all)
+        items, dated = parse_board(txt, u, name, kid, match, take_all, b.get("detail"))
         if dated == 0:
             tried.append(f"{u.replace('https://', '')} → 200이지만 목록 없음({_board_diagnose(txt)})")
             continue
+        if items and items[0]["url"] == u:
+            soup = BeautifulSoup(txt, "html.parser")
+            a0 = next((x for x in soup.find_all("a") if clean(x.get_text(" ")).startswith(items[0]["title"][:15])), None)
+            if a0 is not None:
+                log(f"  (참고) {name} 링크 형태: {str(a0)[:240]}")
         for it in items:
             it["ministry"] = b.get("ministry") or it.get("ministry") or ""
         log(f"  {name}: 게시글 {dated}건 확인 ({kind} 접속, {u.replace('https://', '')})")
@@ -1366,7 +1382,7 @@ def run(cfg, dry_run=False, only=None) -> int:
             if it["id"] in state["seen"]:
                 old = by_id.get(it["id"])
                 if old:
-                    for f in ("period", "status", "notice_no", "posted"):
+                    for f in ("period", "status", "notice_no", "posted", "url"):
                         if it.get(f) and it.get(f) != old.get(f):
                             old[f] = it[f]
                             changed = True
