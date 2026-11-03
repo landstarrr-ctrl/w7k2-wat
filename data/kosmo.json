@@ -1,20 +1,234 @@
 {
- "seen": {},
- "items": [],
+ "seen": {
+  "kosmo-a07e:M000000047": "홈|사용자|사업|사업|사업",
+  "kosmo-a07e:M000000497": "홈|사용자|사업|모집|모집",
+  "kosmo-a07e:M000000051": "홈|사용자|사업|맞춤형공급기업검색",
+  "kosmo-8747:M000000045": "홈|사용자|사업",
+  "kosmo-8747:M000000046": "홈|사용자|사업|사업",
+  "kosmo-8747:M000000047": "홈|사용자|사업|사업|사업",
+  "kosmo-8747:M000000496": "홈|사용자|사업|모집",
+  "kosmo-8747:M000000497": "홈|사용자|사업|모집|모집",
+  "kosmo-8747:M000000048": "홈|사용자|사업|지원사업소개",
+  "kosmo-8747:M000000049": "홈|사용자|사업|담당자연락처",
+  "kosmo-8747:M000000051": "홈|사용자|사업|맞춤형공급기업검색",
+  "kosmo-a07e:M000000045": "홈|사용자|사업",
+  "kosmo-a07e:M000000046": "홈|사용자|사업|사업",
+  "kosmo-a07e:M000000496": "홈|사용자|사업|모집",
+  "kosmo-a07e:M000000048": "홈|사용자|사업|지원사업소개",
+  "kosmo-a07e:M000000049": "홈|사용자|사업|담당자연락처"
+ },
+ "items": [
+  {
+   "id": "kosmo-a07e:M000000045",
+   "source": "KOSMO 사업공고",
+   "title": "홈|사용자|사업안내",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "",
+   "keywords": [],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "홈|사용자|사업",
+   "found_at": "2026-11-03T13:59+09:00",
+   "links": [
+    {
+     "source": "KOSMO 모집공고",
+     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
+    }
+   ],
+   "baseline": true,
+   "groups": [
+    "기타"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:M000000046",
+   "source": "KOSMO 사업공고",
+   "title": "홈|사용자|사업안내|사업공고",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "",
+   "keywords": [],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "홈|사용자|사업|사업",
+   "found_at": "2026-11-03T13:59+09:00",
+   "links": [
+    {
+     "source": "KOSMO 모집공고",
+     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
+    }
+   ],
+   "baseline": true,
+   "groups": [
+    "기타"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:M000000047",
+   "source": "KOSMO 사업공고",
+   "title": "홈|사용자|사업안내|사업공고|사업공고",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "",
+   "keywords": [],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "홈|사용자|사업|사업|사업",
+   "found_at": "2026-11-03T13:59+09:00",
+   "links": [
+    {
+     "source": "KOSMO 모집공고",
+     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
+    }
+   ],
+   "baseline": true,
+   "groups": [
+    "기타"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:M000000496",
+   "source": "KOSMO 사업공고",
+   "title": "홈|사용자|사업안내|모집공고",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "",
+   "keywords": [],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "홈|사용자|사업|모집",
+   "found_at": "2026-11-03T13:59+09:00",
+   "links": [
+    {
+     "source": "KOSMO 모집공고",
+     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
+    }
+   ],
+   "baseline": true,
+   "groups": [
+    "기타"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:M000000497",
+   "source": "KOSMO 사업공고",
+   "title": "홈|사용자|사업안내|모집공고|모집공고",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "",
+   "keywords": [],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "홈|사용자|사업|모집|모집",
+   "found_at": "2026-11-03T13:59+09:00",
+   "links": [
+    {
+     "source": "KOSMO 모집공고",
+     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
+    }
+   ],
+   "baseline": true,
+   "groups": [
+    "기타"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:M000000048",
+   "source": "KOSMO 사업공고",
+   "title": "홈|사용자|사업안내|지원사업 소개",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "",
+   "keywords": [],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "홈|사용자|사업|지원사업소개",
+   "found_at": "2026-11-03T13:59+09:00",
+   "links": [
+    {
+     "source": "KOSMO 모집공고",
+     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
+    }
+   ],
+   "baseline": true,
+   "groups": [
+    "기타"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:M000000049",
+   "source": "KOSMO 사업공고",
+   "title": "홈|사용자|사업안내|담당자 연락처",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "",
+   "keywords": [],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "홈|사용자|사업|담당자연락처",
+   "found_at": "2026-11-03T13:59+09:00",
+   "links": [
+    {
+     "source": "KOSMO 모집공고",
+     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
+    }
+   ],
+   "baseline": true,
+   "groups": [
+    "기타"
+   ]
+  },
+  {
+   "id": "kosmo-a07e:M000000051",
+   "source": "KOSMO 사업공고",
+   "title": "홈|사용자|사업안내|맞춤형 공급기업 검색",
+   "url": "https://smart-factory.kr/usr/bg/ba/ma/bsnsPbanc",
+   "org": "",
+   "period": "",
+   "posted": "",
+   "keywords": [
+    "공급기업"
+   ],
+   "ministry": "중소벤처기업부",
+   "status": "",
+   "tkey": "홈|사용자|사업|맞춤형공급기업검색",
+   "found_at": "2026-11-03T13:59+09:00",
+   "links": [
+    {
+     "source": "KOSMO 모집공고",
+     "url": "https://smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
+    }
+   ],
+   "baseline": true,
+   "groups": [
+    "데이터·솔루션·R&D"
+   ]
+  }
+ ],
  "sources": {
   "KOSMO 사업공고": {
-   "initialized": false,
-   "fails": 3,
-   "error": "목록에서 공고 줄을 찾지 못했습니다."
+   "initialized": true,
+   "fails": 0,
+   "ok_at": "2026-11-03",
+   "ok_time": "2026-11-03T13:59+09:00"
   },
   "KOSMO 모집공고": {
-   "initialized": false,
-   "fails": 3,
-   "error": "목록에서 공고 줄을 찾지 못했습니다."
+   "initialized": true,
+   "fails": 0,
+   "ok_at": "2026-11-03",
+   "ok_time": "2026-11-03T13:59+09:00"
   }
  },
  "cfg_hash": "17193d8d9f67",
  "dash_hash": "6420823c4472",
  "heartbeat": "2026-11-03",
- "updated": "2026-11-03T13:56+09:00"
+ "updated": "2026-11-03T13:59+09:00"
 }
