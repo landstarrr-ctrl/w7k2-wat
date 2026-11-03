@@ -912,12 +912,12 @@
   },
   "KOSMO 사업공고": {
    "initialized": false,
-   "fails": 5,
+   "fails": 6,
    "error": "목록 페이지를 열지 못했습니다(/usr/bg/ba/ma/bsnsPbanc → 404, /usr/bg/ba/ma/bsnsPblanc → 404, /usr/bg/ba/ma/bsnsPbanc.do → 404, /usr/bg/ba/ma/bsnsPblanc.do → 404)"
   },
   "KOSMO 모집공고": {
    "initialized": false,
-   "fails": 5,
+   "fails": 6,
    "error": "목록 페이지를 열지 못했습니다(/usr/bg/ra/ma/rcrtPbanc → 404, /usr/bg/ra/ma/rcrtPblanc → 404, /usr/bg/ra/ma/rcrtPbanc.do → 404, /usr/bg/ra/ma/rcrtPblanc.do → 404)"
   },
   "IRIS": {
@@ -927,7 +927,7 @@
   }
  },
  "heartbeat": "2026-11-03",
- "updated": "2026-11-03T12:46+09:00",
+ "updated": "2026-11-03T12:49+09:00",
  "fix": "mss-v3",
  "cfg_hash": "17193d8d9f67",
  "dash_hash": "f1e0cbd05f22"
