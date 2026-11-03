@@ -117,8 +117,12 @@ sources:
   # KOSMO(스마트제조혁신추진단) 스마트공장 사업관리시스템 게시판
   # take_all: true → 키워드와 상관없이 모든 글을 수집하고, 키워드는 탭 분류에만 사용
   #                  (키워드에 안 맞는 글은 '기타' 탭으로)
+  # run_on: pc → GitHub 서버(해외)에서는 열리지 않아 사무실 PC 실행기에서만 확인
+  #        대시보드는 PC 소식이 stale_minutes(분) 넘게 없으면 바로가기 안내를 띄움
   kosmo:
     enabled: true
+    run_on: pc
+    stale_minutes: 150
     take_all: true
     boards:
       - name: KOSMO 사업공고
@@ -144,5 +148,9 @@ sources:
 
 dashboard:
   title: 정부지원과제 모니터링 시스템
+  # 브라우저 탭에 보이는 이름 (비워 두면 title과 같음). 눈에 덜 띄게 하려면 평범한 이름으로
+  tab_title: 업무 메모
+  # 제목 아래 설명글 (비워 두면 표시 안 함)
+  description: ""
   keep: 500               # 대시보드에 남길 최대 공고 수
   url: ""

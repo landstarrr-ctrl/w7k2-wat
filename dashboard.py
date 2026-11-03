@@ -50,6 +50,16 @@ header p{margin:0;color:var(--muted);max-width:60ch}
   font-size:14px;color:var(--muted)}
 .status img{height:20px;vertical-align:middle}
 .status .bad{color:var(--seal)}
+.kosmo{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:14px;padding:10px 14px;
+  border-radius:8px;border:1px solid var(--rule);background:var(--sheet);font-size:14px;color:var(--muted)}
+.kosmo .kdot{width:8px;height:8px;border-radius:50%;background:var(--open)}
+.kosmo .klinks{display:flex;gap:12px;margin-left:auto}
+.kosmo .klinks a{color:var(--link);font-weight:600;text-decoration:none}
+.kosmo .klinks a:hover{text-decoration:underline}
+.kosmo.off{border-color:var(--motie);background:var(--motie-bg);color:var(--ink)}
+.kosmo.off .kdot{background:var(--motie)}
+.kosmo.off .klinks a{background:var(--sheet);border:1px solid var(--motie);border-radius:6px;padding:4px 10px}
+@media (max-width:560px){.kosmo .klinks{margin-left:0;width:100%}}
 .tools{margin:32px 0 8px;display:flex;flex-direction:column;gap:12px}
 .search{width:100%;font:inherit;font-family:inherit;padding:12px 14px;border:1px solid var(--rule);border-radius:6px;
   background:var(--sheet);color:var(--ink)}
@@ -261,7 +271,7 @@ def _row(it) -> str:
     )
 
 
-def render(*, title, items, groups, sources, updated, repo, new_hours, now) -> str:
+def render(*, title, items, groups, sources, updated, repo, new_hours, now, kosmo=None, tab_title=None, description=None) -> str:
     months: "OrderedDict[str, list]" = OrderedDict()
     for it in items:
         months.setdefault(_date_parts(it)[0], []).append(it)
@@ -275,7 +285,11 @@ def render(*, title, items, groups, sources, updated, repo, new_hours, now) -> s
         status.append(
             f'<a href="https://github.com/{E(repo)}/actions" target="_blank" rel="noopener">'
             f'<img src="https://github.com/{E(repo)}/actions/workflows/monitor.yml/badge.svg" alt="감시 작동 상태"></a>')
+    kosmo = kosmo or {}
+    knames = {b.get("name") for b in kosmo.get("boards") or []}
     for name, st in (sources or {}).items():
+        if name in knames:
+            continue                     # KOSMO 상태는 아래 안내 상자에서 따로 표시
         if st.get("error"):
             status.append(f'<span class="bad">{E(name)} 확인 실패 {st.get("fails", 0)}회</span>')
         elif st.get("ok_at"):
@@ -294,6 +308,15 @@ def render(*, title, items, groups, sources, updated, repo, new_hours, now) -> s
         body = ('<div class="empty">아직 기록된 공고가 없습니다. 첫 확인이 끝나면 키워드에 맞는 '
                 '공고가 이곳에 쌓입니다.</div>')
 
+    kosmo_html = ""
+    if kosmo.get("boards"):
+        links = "".join(f'<a href="{E(b["url"], quote=True)}" target="_blank" rel="noopener">{E(b["name"].replace("KOSMO ", ""))} 바로가기</a>'
+                        for b in kosmo["boards"])
+        kosmo_html = (f'<div class="kosmo" id="kosmo" data-last="{E(kosmo.get("last", ""), quote=True)}" '
+                      f'data-stale="{int(kosmo.get("stale_min") or 150)}">'
+                      f'<span class="kdot" aria-hidden="true"></span><span id="kmsg">KOSMO 확인 상태를 불러오는 중</span>'
+                      f'<span class="klinks">{links}</span></div>')
+
     tabs = [f'<button type="button" class="tab" role="tab" data-g="" aria-selected="true">'
             f'전체<span>{len(items)}</span></button>']
     for g, n in counts.items():
@@ -306,7 +329,10 @@ def render(*, title, items, groups, sources, updated, repo, new_hours, now) -> s
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{E(title)}</title>
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>{E(tab_title or title)}</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📮</text></svg>">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
@@ -326,8 +352,9 @@ def render(*, title, items, groups, sources, updated, repo, new_hours, now) -> s
 </div>
 <header>
   <h1>{E(title)}</h1>
-  <p>기업마당·중소벤처기업부·KOSMO·IRIS의 스마트공장·제조AI·자율형공장·피지컬AI 관련 공고를 분류별로 모았습니다. 새 공고는 텔레그램으로도 알려 드립니다.</p>
+  {f"<p>{E(description)}</p>" if description else ""}
   <div class="status">{''.join(status)}</div>
+  {kosmo_html}
 </header>
 <div class="tools">
   <input id="q" class="search" type="search" placeholder="공고명·기관으로 찾기" aria-label="공고 검색">
@@ -354,6 +381,23 @@ def render(*, title, items, groups, sources, updated, repo, new_hours, now) -> s
     var h=p.hour==='24'?'00':p.hour;
     el.textContent=p.year+'년 '+p.month+'월 '+p.day+'일 ('+p.weekday+') '+h+':'+p.minute+':'+p.second;}}
   tick();setInterval(tick,1000);
+  var k=document.getElementById('kosmo');
+  function kcheck(){{
+    if(!k)return;
+    var last=Date.parse(k.dataset.last||''), lim=(+k.dataset.stale||150)*60000, msg=document.getElementById('kmsg');
+    var tfm=new Intl.DateTimeFormat('ko-KR',{{timeZone:'Asia/Seoul',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}});
+    var tf={{format:function(d){{var q={{}};tfm.formatToParts(d).forEach(function(x){{q[x.type]=x.value;}});
+      return q.month+'월 '+q.day+'일 '+(q.hour==='24'?'00':q.hour)+':'+q.minute;}}}};
+    if(!isNaN(last)&&Date.now()-last<lim){{
+      k.classList.remove('off');
+      msg.textContent='KOSMO 공고는 사무실 PC에서 자동 확인 중 · 마지막 '+tf.format(new Date(last));
+    }}else{{
+      k.classList.add('off');
+      msg.textContent=isNaN(last)?'KOSMO 공고는 사무실 PC가 켜져 있어야 자동으로 확인됩니다. 지금은 직접 확인해 주세요.'
+        :'사무실 PC가 꺼져 있어 KOSMO 공고를 자동 확인하지 못하고 있습니다(마지막 '+tf.format(new Date(last))+'). 직접 확인해 주세요.';
+    }}
+  }}
+  kcheck();setInterval(kcheck,60000);
 }})();
 </script>
 <script>{JS % new_hours}

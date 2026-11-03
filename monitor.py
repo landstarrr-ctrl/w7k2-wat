@@ -34,6 +34,7 @@ from bs4 import BeautifulSoup
 ROOT = Path(__file__).resolve().parent
 CONFIG_PATH = ROOT / "config.yaml"
 STATE_PATH = ROOT / "data" / "state.json"
+KOSMO_PATH = ROOT / "data" / "kosmo.json"      # 사무실 PC가 쓰는 KOSMO 전용 기록
 DOCS_DIR = ROOT / "docs"
 KST = dt.timezone(dt.timedelta(hours=9))
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -807,9 +808,10 @@ def notify(cfg, header: str, items: list[dict] | None = None, notes: list[str] |
 
 
 # ───────────────────────── 상태 저장 ─────────────────────────
-def load_state() -> dict:
-    if STATE_PATH.exists():
-        state = json.loads(STATE_PATH.read_text(encoding="utf-8"))
+def load_state(path=None) -> dict:
+    path = path or STATE_PATH
+    if path.exists():
+        state = json.loads(path.read_text(encoding="utf-8"))
     else:
         state = {}
     state.setdefault("seen", {})       # id -> title_key
@@ -818,9 +820,10 @@ def load_state() -> dict:
     return state
 
 
-def save_state(state: dict) -> None:
-    STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=1), encoding="utf-8")
+def save_state(state: dict, path=None) -> None:
+    path = path or STATE_PATH
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(state, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
 def sort_key(it):
@@ -844,32 +847,79 @@ def group_summary(items) -> str:
     return ", ".join(f"{g} {n}건" for g, n in counts.items())
 
 
+def merged_items(state, kstate, matcher):
+    """GitHub 기록과 KOSMO(PC) 기록을 합칩니다. 같은 공고면 출처 링크만 더합니다."""
+    out = [dict(it) for it in state["items"]]
+    for k in kstate.get("items") or []:
+        k = dict(k)
+        k.setdefault("tkey", title_key(k.get("title", "")))
+        twin = find_twin(k["tkey"], out)
+        if twin:
+            links = list(twin.get("links") or [])
+            if all(l["url"] != k["url"] for l in links) and twin.get("url") != k["url"]:
+                links.append({"source": k["source"], "url": k["url"]})
+            twin["links"] = links
+            if not twin.get("period") and k.get("period"):
+                twin["period"] = k["period"]
+        else:
+            out.append(k)
+    for it in out:
+        classify_item(matcher, it)
+    out.sort(key=sort_key, reverse=True)
+    return out
+
+
 def render_dashboard(cfg, state, matcher) -> None:
     from dashboard import render  # 같은 폴더의 dashboard.py
     DOCS_DIR.mkdir(parents=True, exist_ok=True)
     repo = os.environ.get("GITHUB_REPOSITORY", "")
+    kstate = load_state(KOSMO_PATH)
+    items = merged_items(state, kstate, matcher)
+    kcfg = (cfg.get("sources") or {}).get("kosmo") or {}
     page = render(
         title=(cfg.get("dashboard") or {}).get("title") or "공고 감시",
-        items=state["items"],
-        groups=matcher.names + (["기타"] if any("기타" in (it.get("groups") or []) for it in state["items"]) else []),
-        sources=state["sources"],
-        updated=state.get("updated", ""),
+        tab_title=(cfg.get("dashboard") or {}).get("tab_title") or "",
+        description=(cfg.get("dashboard") or {}).get("description") or "",
+        items=items,
+        groups=matcher.names + (["기타"] if any("기타" in (it.get("groups") or []) for it in items) else []),
+        sources={k: v for k, v in state["sources"].items() if k not in kosmo_names(cfg)},
+        updated=max(state.get("updated", ""), kstate.get("updated", "")),
         repo=repo,
         new_hours=NEW_BADGE_HOURS,
+        kosmo={"boards": [b for b in kcfg.get("boards") or [] if b] if kcfg.get("enabled") else [],
+               "last": max([kstate["sources"].get(n, {}).get("ok_time", "") for n in kosmo_names(cfg)] or [""]),
+               "stale_min": int(kcfg.get("stale_minutes") or 150)},
         now=now_kst(),
     )
     (DOCS_DIR / "index.html").write_text(page, encoding="utf-8")
-    (DOCS_DIR / "items.json").write_text(
-        json.dumps(state["items"], ensure_ascii=False, indent=1), encoding="utf-8")
+    old_json = DOCS_DIR / "items.json"        # 공개 폴더에 목록 데이터를 따로 두지 않음
+    if old_json.exists():
+        old_json.unlink()
     nojekyll = DOCS_DIR / ".nojekyll"
     if not nojekyll.exists():
         nojekyll.write_text("", encoding="utf-8")
 
 
 # ───────────────────────── 실행 ─────────────────────────
-def build_sources(cfg, session, match, state=None):
+def on_github_server() -> bool:
+    return os.environ.get("RUNNER_ENVIRONMENT", "").lower() == "github-hosted"
+
+
+def kosmo_names(cfg) -> list[str]:
+    k = (cfg.get("sources") or {}).get("kosmo") or {}
+    return [b["name"] for b in k.get("boards") or [] if b and b.get("name")] if k.get("enabled") else []
+
+
+def build_sources(cfg, session, match, state=None, only=None):
     src = cfg.get("sources") or {}
     out = []
+    kosmo_where = ((src.get("kosmo") or {}).get("run_on") or "pc").lower()
+    skip_kosmo = kosmo_where == "pc" and on_github_server()
+    if only == "kosmo":
+        k = src.get("kosmo") or {}
+        take_all = bool(k.get("take_all", True))
+        return [(b["name"], lambda b=b: fetch_kosmo(session, b, match, take_all))
+                for b in k.get("boards") or [] if b and b.get("url") and b.get("name")]
     biz = src.get("bizinfo") or {}
     if biz.get("enabled", True):
         out.append(("기업마당", lambda: fetch_bizinfo(session, biz, match, bool(cfg.get("match_summary")))))
@@ -877,7 +927,7 @@ def build_sources(cfg, session, match, state=None):
     if mss.get("enabled", True):
         out.append(("중기부 누리집", lambda: fetch_mss(session, mss, match)))
     kosmo = src.get("kosmo") or {}
-    if kosmo.get("enabled", False):
+    if kosmo.get("enabled", False) and not skip_kosmo:
         take_all = bool(kosmo.get("take_all", True))
         for b in kosmo.get("boards") or []:
             if b and b.get("url") and b.get("name"):
@@ -892,8 +942,11 @@ def build_sources(cfg, session, match, state=None):
     return out
 
 
-def run(cfg, dry_run=False) -> int:
-    state = load_state()
+def run(cfg, dry_run=False, only=None) -> int:
+    pc_mode = only == "kosmo"
+    state_path = KOSMO_PATH if pc_mode else STATE_PATH
+    state = load_state(state_path)
+    other = load_state(STATE_PATH if pc_mode else KOSMO_PATH)   # 상대 기록(읽기만): 중복 알림 방지용
     match = Matcher(cfg)
     cfg_id = config_hash(cfg)
     # 키워드를 바꾼 뒤 첫 실행: 새로 잡힌 기존 공고는 하나씩 알리지 않고 요약만 보냄
@@ -912,7 +965,7 @@ def run(cfg, dry_run=False) -> int:
     dup_links: list[tuple[str, dict]] = []
 
     # 한 번만 실행: 예전 버전의 오류 정리 후 중기부 게시판을 조용히 다시 기록
-    if state.get("fix") != "mss-v3":
+    if not pc_mode and state.get("fix") != "mss-v3":
         state["items"] = [it for it in state["items"]
                           if not (it["id"].startswith("mss:") and not it.get("posted"))]
         kept = {it["id"] for it in state["items"]}
@@ -923,10 +976,16 @@ def run(cfg, dry_run=False) -> int:
         changed = True
         log("중기부 게시판 기록을 정리하고 다시 확인합니다.")
 
-    for it in state["items"]:          # 비교 규칙이 바뀌어도 예전 기록과 맞도록 다시 계산
+    for it in state["items"] + other["items"]:   # 비교 규칙이 바뀌어도 예전 기록과 맞도록 다시 계산
         it["tkey"] = title_key(it.get("title", ""))
 
-    for name, fetch in build_sources(cfg, session, match, state):
+    if not pc_mode:                     # KOSMO 상태는 이제 kosmo.json에서 관리 → 예전 기록 정리
+        for kn in kosmo_names(cfg):
+            if kn in state["sources"] and on_github_server():
+                state["sources"].pop(kn)
+                changed = True
+
+    for name, fetch in build_sources(cfg, session, match, state, only):
         st = state["sources"].setdefault(name, {"initialized": False, "fails": 0})
         try:
             items = fetch()
@@ -946,6 +1005,14 @@ def run(cfg, dry_run=False) -> int:
             st.pop("error", None)
             changed = True
         st["ok_at"] = stamp[:10]
+        prev = st.get("ok_time", "")
+        try:
+            stale = (now_kst() - dt.datetime.fromisoformat(prev)).total_seconds() > 50 * 60
+        except ValueError:
+            stale = True
+        if stale:                       # 50분에 한 번만 기록(대시보드의 'PC 켜짐' 판단용)
+            st["ok_time"] = stamp
+            changed = True
         log(f"{name}: 키워드 일치 {len(items)}건")
 
         first_time = not st.get("initialized")
@@ -957,6 +1024,13 @@ def run(cfg, dry_run=False) -> int:
             it["tkey"] = tk
             it["found_at"] = stamp
             twin = find_twin(tk, state["items"]) or find_twin(tk, run_keys.values())
+            if not twin and find_twin(tk, other["items"]):
+                # 다른 쪽(GitHub↔PC)에서 이미 알린 공고: 조용히 기록만 (대시보드에서 하나로 합쳐짐)
+                it["quiet"] = True
+                state["seen"][it["id"]] = tk
+                state["items"].append(it)
+                changed = True
+                continue
             if twin:
                 dup_links.append((it["id"], {"tkey": tk, "source": it["source"], "url": it["url"], "twin": twin}))
                 continue
@@ -1016,6 +1090,8 @@ def run(cfg, dry_run=False) -> int:
         changed = True
     # 대시보드 설정(제목 등)이나 dashboard.py만 바꿔도 바로 다시 그리도록
     dash_src = (ROOT / "dashboard.py").read_bytes() if (ROOT / "dashboard.py").exists() else b""
+    if not pc_mode and KOSMO_PATH.exists():
+        dash_src += KOSMO_PATH.read_bytes()   # 사무실 PC가 KOSMO 기록을 올리면 대시보드 갱신
     dash_id = hashlib.sha1(json.dumps(cfg.get("dashboard") or {}, ensure_ascii=False, sort_keys=True).encode("utf-8")
                            + dash_src).hexdigest()[:12]
     if state.get("dash_hash") != dash_id:
@@ -1040,9 +1116,10 @@ def run(cfg, dry_run=False) -> int:
         state["items"].sort(key=sort_key, reverse=True)
         state["items"] = state["items"][:keep]
         state["updated"] = stamp
-        save_state(state)
-        render_dashboard(cfg, state, match)
-        log("상태와 대시보드를 저장했습니다.")
+        save_state(state, state_path)
+        if not pc_mode:
+            render_dashboard(cfg, state, match)
+        log("KOSMO 기록을 저장했습니다." if pc_mode else "상태와 대시보드를 저장했습니다.")
     else:
         log("변동 없음")
     return 0
@@ -1053,6 +1130,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="스마트제조혁신 공고 감시")
     ap.add_argument("--dry-run", action="store_true", help="확인만 하고 저장·알림 안 함")
     ap.add_argument("--test-notify", action="store_true", help="알림 채널 테스트 메시지 전송")
+    ap.add_argument("--only", choices=["kosmo"], help="kosmo: KOSMO 게시판만 확인(사무실 PC용)")
     args = ap.parse_args()
     cfg = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8")) or {}
 
@@ -1064,7 +1142,7 @@ def main() -> int:
         }
         ok = notify(cfg, "알림 테스트", items=[sample], notes=["이 메시지가 보이면 알림 설정이 끝난 것입니다."])
         return 0 if ok else 1
-    return run(cfg, dry_run=args.dry_run)
+    return run(cfg, dry_run=args.dry_run, only=args.only)
 
 
 if __name__ == "__main__":
