@@ -1325,23 +1325,21 @@
  "sources": {
   "기업마당": {
    "initialized": true,
-   "fails": 1,
+   "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T16:34+09:00",
-   "error": "접속 실패: HTTPSConnectionPool(host='www.bizinfo.go.kr', port=443): Max retries exceeded with url: /uss/rss/bizinfoApi.do?crtfcKey=im8Z1q&dataType=json&searchCnt=300 (Caused by ConnectTimeoutError(<HTTPSC"
+   "ok_time": "2026-11-03T17:26+09:00"
   },
   "중기부 누리집": {
    "initialized": true,
-   "fails": 1,
+   "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T16:34+09:00",
-   "error": "접속 실패: HTTPSConnectionPool(host='www.mss.go.kr', port=443): Max retries exceeded with url: /site/smba/ex/bbs/List.do?cbIdx=310 (Caused by ConnectTimeoutError(<HTTPSConnection(host='www.mss.go.kr', por"
+   "ok_time": "2026-11-03T17:26+09:00"
   },
   "IRIS": {
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T16:34+09:00"
+   "ok_time": "2026-11-03T17:26+09:00"
   },
   "KOSMO 사업공고": {
    "initialized": true,
@@ -1359,17 +1357,17 @@
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T16:34+09:00"
+   "ok_time": "2026-11-03T17:26+09:00"
   },
   "로봇산업진흥원 사업공고": {
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T16:34+09:00"
+   "ok_time": "2026-11-03T17:26+09:00"
   }
  },
  "heartbeat": "2026-11-03",
- "updated": "2026-11-03T17:10+09:00",
+ "updated": "2026-11-03T17:26+09:00",
  "fix": "mss-v3",
  "cfg_hash": "17193d8d9f67",
  "dash_hash": "df20580723b0"
