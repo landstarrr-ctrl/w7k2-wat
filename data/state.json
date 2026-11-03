@@ -912,12 +912,12 @@
   },
   "KOSMO 사업공고": {
    "initialized": false,
-   "fails": 1,
+   "fails": 2,
    "error": "접속 실패: 404 Client Error: 404 for url: https://www.smart-factory.kr/usr/bg/ba/ma/bsnsPbanc"
   },
   "KOSMO 모집공고": {
    "initialized": false,
-   "fails": 1,
+   "fails": 2,
    "error": "접속 실패: 404 Client Error: 404 for url: https://www.smart-factory.kr/usr/bg/ra/ma/rcrtPbanc"
   },
   "IRIS": {
@@ -927,7 +927,7 @@
   }
  },
  "heartbeat": "2026-11-03",
- "updated": "2026-11-03T12:32+09:00",
+ "updated": "2026-11-03T12:34+09:00",
  "fix": "mss-v3",
  "cfg_hash": "17193d8d9f67",
  "dash_hash": "38558757234b"
