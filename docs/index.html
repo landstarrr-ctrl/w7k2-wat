@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-mode="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,16 +20,6 @@
   --open:#1F7A3D; --open-bg:#DFF3E5; --soon:#2F64C8; --soon-bg:#E3ECFB; --shut:#6B7480; --shut-bg:#E9ECEF;
   color-scheme:light;
 }
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --paper:#11161C; --sheet:#182029; --ink:#E4E9EE; --muted:#93A0AD; --rule:#2A3440;
-    --seal:#E5534B; --link:#8EB6F2; --chip:#232D38; --chip-on:#E4E9EE; --chip-on-ink:#11161C;
-    --mss:#7FA9F5; --mss-bg:#1C2B45; --motie:#F2A25A; --motie-bg:#3A2716; --msit:#5CC9BB; --msit-bg:#15332F;
-    --multi:#B79AF0; --multi-bg:#2C2342; --local:#A3AEBA; --local-bg:#26303B;
-    --open:#6FD08F; --open-bg:#173322; --soon:#7FA9F5; --soon-bg:#1C2B45; --shut:#97A1AC; --shut-bg:#262E37;
-    color-scheme:dark;
-  }
-}
 :root[data-theme="dark"]{
     --paper:#11161C; --sheet:#182029; --ink:#E4E9EE; --muted:#93A0AD; --rule:#2A3440;
     --seal:#E5534B; --link:#8EB6F2; --chip:#232D38; --chip-on:#E4E9EE; --chip-on-ink:#11161C;
@@ -49,11 +39,11 @@ header h1{font-size:30px;line-height:1.25;font-weight:700;letter-spacing:-.02em;
   padding-bottom:12px;border-bottom:1px solid var(--rule)}
 .clock{font-variant-numeric:tabular-nums;font-size:14px;color:var(--muted);letter-spacing:.01em}
 .clock b{color:var(--ink);font-weight:600;margin-left:6px}
-.theme{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:13px;color:var(--ink);
-  background:var(--sheet);border:1px solid var(--rule);border-radius:999px;padding:6px 12px 6px 9px;cursor:pointer}
+.theme{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;padding:0;
+  color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:50%;cursor:pointer}
 .theme:hover{border-color:var(--muted)}
 .theme:focus-visible{outline:2px solid var(--link);outline-offset:2px}
-.theme svg{width:16px;height:16px}
+.theme svg{width:18px;height:18px}
 .theme .sun{display:none}
 :root[data-mode="dark"] .theme .sun{display:inline}
 :root[data-mode="dark"] .theme .moon{display:none}
@@ -138,16 +128,15 @@ footer a{color:var(--muted)}
 <div class="wrap">
 <div class="top">
   <div class="clock" aria-live="off">현재 시각<b id="clock">—</b></div>
-  <button type="button" class="theme" id="themeBtn" aria-label="화면 밝기 바꾸기">
+  <button type="button" class="theme" id="themeBtn" aria-label="다크 모드로 바꾸기" title="다크 모드로 바꾸기">
     <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
     <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-    <span id="themeLabel">다크 모드</span>
   </button>
 </div>
 <header>
   <h1>정부지원과제 모니터링 시스템</h1>
   <p>기업마당·중소벤처기업부·KOSMO·IRIS의 스마트공장·제조AI·자율형공장·피지컬AI 관련 공고를 분류별로 모았습니다. 새 공고는 텔레그램으로도 알려 드립니다.</p>
-  <div class="status"><a href="https://github.com/landstarrr-ctrl/gonggo-watch/actions" target="_blank" rel="noopener"><img src="https://github.com/landstarrr-ctrl/gonggo-watch/actions/workflows/monitor.yml/badge.svg" alt="감시 작동 상태"></a><span>기업마당 정상</span><span>중기부 누리집 정상</span><span class="bad">KOSMO 사업공고 확인 실패 2회</span><span class="bad">KOSMO 모집공고 확인 실패 2회</span><span>IRIS 정상</span><span>마지막 변동 2026-11-03 12:34</span></div>
+  <div class="status"><a href="https://github.com/landstarrr-ctrl/gonggo-watch/actions" target="_blank" rel="noopener"><img src="https://github.com/landstarrr-ctrl/gonggo-watch/actions/workflows/monitor.yml/badge.svg" alt="감시 작동 상태"></a><span>기업마당 정상</span><span>중기부 누리집 정상</span><span class="bad">KOSMO 사업공고 확인 실패 3회</span><span class="bad">KOSMO 모집공고 확인 실패 3회</span><span>IRIS 정상</span><span>마지막 변동 2026-11-03 12:39</span></div>
 </header>
 <div class="tools">
   <input id="q" class="search" type="search" placeholder="공고명·기관으로 찾기" aria-label="공고 검색">
@@ -160,15 +149,12 @@ footer a{color:var(--muted)}
 </div>
 <script>
 (function(){
-  var root=document.documentElement, btn=document.getElementById('themeBtn'), lab=document.getElementById('themeLabel');
-  var mq=window.matchMedia('(prefers-color-scheme: dark)');
-  function mode(){var t=root.getAttribute('data-theme');return t||(mq.matches?'dark':'light');}
-  function paint(){var m=mode();root.setAttribute('data-mode',m);
-    lab.textContent=m==='dark'?'라이트 모드':'다크 모드';
-    btn.setAttribute('aria-label',m==='dark'?'라이트 모드로 바꾸기':'다크 모드로 바꾸기');}
+  var root=document.documentElement, btn=document.getElementById('themeBtn');
+  function mode(){return root.getAttribute('data-theme')==='dark'?'dark':'light';}
+  function paint(){var m=mode(), tip=m==='dark'?'라이트 모드로 바꾸기':'다크 모드로 바꾸기';
+    root.setAttribute('data-mode',m);btn.setAttribute('aria-label',tip);btn.setAttribute('title',tip);}
   btn.addEventListener('click',function(){var next=mode()==='dark'?'light':'dark';
     root.setAttribute('data-theme',next);try{localStorage.setItem('theme',next);}catch(e){}paint();});
-  if(mq.addEventListener)mq.addEventListener('change',paint);
   paint();
   var el=document.getElementById('clock'), days=['일','월','화','수','목','금','토'];
   var fmt=new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',
