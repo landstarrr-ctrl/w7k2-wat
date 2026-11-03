@@ -117,6 +117,23 @@ sources:
   # KOSMO(스마트제조혁신추진단) 스마트공장 사업관리시스템 게시판
   # take_all: true → 키워드와 상관없이 모든 글을 수집하고, 키워드는 탭 분류에만 사용
   #                  (키워드에 안 맞는 글은 '기타' 탭으로)
+  # 일반 게시판 출처: 주소 후보(alt_urls)를 위에서부터 시도합니다.
+  boards:
+    - name: SMTECH 사업공고
+      enabled: true
+      ministry: 중소벤처기업부
+      url: https://www.smtech.go.kr/front/ifg/no/notice02_list.do
+      alt_urls:
+        - https://www.smtech.go.kr/front/ifg/no/notice02_list.do?searchCondition=&searchKeyword=
+        - https://smtech.go.kr/front/ifg/no/notice02_list.do
+    - name: 로봇산업진흥원 사업공고
+      enabled: true
+      ministry: 산업통상자원부
+      url: https://www.kiria.org/portal/notice/portalBizNotice.do
+      alt_urls:
+        - https://www.kiria.org/portal/board/boardList.do?bbsId=BIZ
+        - https://pms.kiria.org/main/board/notice.do
+
   # run_on: github → GitHub 서버가 다른 출처와 함께 확인 (기본 추천)
   #        pc     → 사무실 PC 실행기에서만 확인, 대시보드는 PC 소식이
   #                 stale_minutes(분) 넘게 없으면 바로가기 안내를 띄움

@@ -929,6 +929,58 @@ def fetch_iris(session, cfg, match, seen_ids):
     return items
 
 
+_BOARD_CLIENT = {}
+
+
+def _board_client():
+    if "c" not in _BOARD_CLIENT:
+        try:
+            from curl_cffi import requests as curl_requests
+            _BOARD_CLIENT["c"] = curl_requests.Session(impersonate="chrome")
+            _BOARD_CLIENT["kind"] = "크롬 흉내"
+        except Exception:  # noqa: BLE001
+            _BOARD_CLIENT["c"] = None
+            _BOARD_CLIENT["kind"] = "일반"
+    return _BOARD_CLIENT["c"], _BOARD_CLIENT["kind"]
+
+
+def fetch_board(session, b, match):
+    """설정의 일반 게시판(사업공고 목록)을 읽습니다. 주소 후보를 차례로 시도."""
+    name, take_all = b["name"], bool(b.get("take_all", False))
+    kid = "bd-" + short_hash(b["url"])[:4]
+    client, kind = _board_client()
+    urls = list(dict.fromkeys([b["url"]] + list(b.get("alt_urls") or [])))
+    tried = []
+    for u in urls:
+        try:
+            if client is not None:
+                r = client.get(u, timeout=30, headers={"Accept-Language": "ko,en;q=0.8"})
+                txt = r.text
+                code = r.status_code
+            else:
+                r = http_get(session, u)
+                r.encoding = r.apparent_encoding or "utf-8"
+                txt, code = r.text, r.status_code
+        except Exception as e:  # noqa: BLE001
+            tried.append(f"{u.replace('https://', '')} → {type(e).__name__}")
+            continue
+        if code != 200:
+            t = BeautifulSoup(txt or "", "html.parser").title
+            tried.append(f"{u.replace('https://', '')} → {code}({clean(t.get_text()) if t else '제목 없음'})")
+            continue
+        items, dated = parse_board(txt, u, name, kid, match, take_all)
+        if dated == 0:
+            tried.append(f"{u.replace('https://', '')} → 200이지만 목록 없음({_board_diagnose(txt)})")
+            continue
+        for it in items:
+            it["ministry"] = b.get("ministry") or it.get("ministry") or ""
+        log(f"  {name}: 게시글 {dated}건 확인 ({kind} 접속, {u.replace('https://', '')})")
+        if items:
+            log(f"  (참고) 첫 게시글: {items[0]['title'][:60]} / {items[0]['posted']} / {items[0]['url'][:90]}")
+        return items
+    raise RuntimeError("게시판을 읽지 못했습니다: " + " | ".join(tried[-4:]))
+
+
 def fetch_page(session, page, match):
     url = page["url"]
     r = http_get(session, url)
@@ -1194,6 +1246,9 @@ def build_sources(cfg, session, match, state=None, only=None):
     out = []
     kosmo_where = ((src.get("kosmo") or {}).get("run_on") or "pc").lower()
     skip_kosmo = kosmo_where == "pc" and on_github_server()
+    if only == "boards":
+        return [(b["name"], lambda b=b: fetch_board(session, b, match))
+                for b in src.get("boards") or [] if b and b.get("url") and b.get("name")]
     if only == "kosmo":
         k = src.get("kosmo") or {}
         take_all = bool(k.get("take_all", True))
@@ -1215,6 +1270,9 @@ def build_sources(cfg, session, match, state=None, only=None):
     if iris_cfg.get("enabled", False):
         seen_ids = set((state or {}).get("seen", {}))
         out.append(("IRIS", lambda: fetch_iris(session, iris_cfg, match, seen_ids)))
+    for b in src.get("boards") or []:
+        if b and b.get("url") and b.get("name") and b.get("enabled", True):
+            out.append((b["name"], lambda b=b: fetch_board(session, b, match)))
     for page in src.get("pages") or []:
         if page and page.get("url") and page.get("name"):
             out.append((page["name"], lambda p=page: fetch_page(session, p, match)))
@@ -1423,7 +1481,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="스마트제조혁신 공고 감시")
     ap.add_argument("--dry-run", action="store_true", help="확인만 하고 저장·알림 안 함")
     ap.add_argument("--test-notify", action="store_true", help="알림 채널 테스트 메시지 전송")
-    ap.add_argument("--only", choices=["kosmo"], help="kosmo: KOSMO 게시판만 확인(사무실 PC용)")
+    ap.add_argument("--only", choices=["kosmo", "boards"],
+                    help="kosmo: KOSMO 게시판만 / boards: 일반 게시판(SMTECH 등)만 확인(시험용)")
     args = ap.parse_args()
     cfg = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8")) or {}
 
