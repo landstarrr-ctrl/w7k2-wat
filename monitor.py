@@ -23,6 +23,7 @@ import sys
 import time
 from email.header import Header
 from email.mime.text import MIMEText
+from difflib import SequenceMatcher
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -71,7 +72,39 @@ def norm(s) -> str:
 
 def title_key(title: str) -> str:
     """출처가 달라도 같은 공고인지 비교하기 위한 제목 키."""
-    return norm(re.sub(r"[「」『』\[\]()<>〈〉《》“”\"'‘’·ㆍ,.\-_~]", "", title or ""))
+    t = re.sub(r"[「」『』\[\]()<>〈〉《》“”\"'‘’·ㆍ,.\-_~]", "", title or "")
+    t = norm(t).replace("년도", "년")
+    t = re.sub(r"(?:공고|안내|알림)", "", t)
+    return t
+
+
+REGIONS = ("서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남",
+           "전북", "전남", "경북", "경남", "제주", "포항", "창원", "김해", "천안", "청주", "구미", "안산")
+FLAGS = ("추가", "연장", "재공고", "변경", "결과", "선정", "취소", "정정", "마감", "상반기", "하반기")
+
+
+def _signature(tk: str):
+    """제목에서 '다르면 다른 공고'인 요소(지역·숫자·추가/연장 등)만 뽑습니다."""
+    return (frozenset(r for r in REGIONS if r in tk),
+            tuple(re.findall(r"\d+", tk)),
+            frozenset(f for f in FLAGS if f in tk))
+
+
+def find_twin(tk: str, pool):
+    """제목 키가 같거나, 지역·숫자·추가/연장 여부가 같으면서 거의 같은(92% 이상) 기존 공고를 찾습니다."""
+    if not tk:
+        return None
+    pool = list(pool)
+    for it in pool:
+        if it.get("tkey") == tk:
+            return it
+    sig = _signature(tk)
+    for it in pool:
+        other = it.get("tkey") or ""
+        if (other and abs(len(other) - len(tk)) <= 4 and _signature(other) == sig
+                and SequenceMatcher(None, tk, other).ratio() >= 0.92):
+            return it
+    return None
 
 
 def fmt_period(s) -> str:
@@ -215,6 +248,7 @@ def fetch_bizinfo(session, cfg, match, match_summary):
             "title": title,
             "url": url or "https://www.bizinfo.go.kr",
             "org": " / ".join(dict.fromkeys(o for o in orgs if o)),
+            "ministry": orgs[0] or orgs[1],
             "period": fmt_period(row.get("reqstBeginEndDe") or row.get("reqstDt")),
             "posted": clean(row.get("creatPnttm") or row.get("pubDate"))[:10],
             "keywords": hits,
@@ -277,11 +311,199 @@ def fetch_mss(session, cfg, match):
         items.append({
             "id": f"mss:{bid}",
             "source": "중기부 누리집",
+            "ministry": "중소벤처기업부",
             "title": title,
             "url": link,
             "keywords": hits,
             **details,
         })
+    return items
+
+
+DATE_RE = r"\d{4}[.\-/]\s?\d{1,2}[.\-/]\s?\d{1,2}"
+
+
+def _ymd(d: str) -> str:
+    y, m, dd = re.split(r"[.\-/]\s?", d.strip())[:3]
+    return f"{y}-{int(m):02d}-{int(dd):02d}"
+
+
+def _board_diagnose(html: str) -> str:
+    soup = BeautifulSoup(html, "html.parser")
+    title = clean(soup.title.get_text()) if soup.title else ""
+    hints = sorted(set(re.findall(r"['\"](/[\w/\-.]*(?:[Ll]ist|[Aa]jax|[Ss]elect|[Ss]earch)[\w/\-.]*)['\"]", html)))[:8]
+    return (f"페이지 크기 {len(html):,}자, 제목 '{title}', 링크 {len(soup.find_all('a'))}개, "
+            f"표 줄 {len(soup.find_all('tr'))}개, 목록 항목 {len(soup.find_all('li'))}개, "
+            f"스크립트 주소 단서 {hints}")
+
+
+def parse_board(html, base_url, source, id_prefix, match, take_all):
+    """날짜가 있는 줄을 게시글로 보고 제목·기간·등록일을 뽑습니다."""
+    soup = BeautifulSoup(html, "html.parser")
+    rows = soup.select("tbody tr") or soup.find_all(["tr", "li"])
+    items, seen, dated = [], set(), 0
+    for row in rows:
+        text = clean(row.get_text(" "))
+        dates = re.findall(DATE_RE, text)
+        if not dates or len(text) > 600:
+            continue
+        anchors = [a for a in row.find_all("a") if len(clean(a.get_text(" "))) >= 6]
+        if anchors:
+            a = max(anchors, key=lambda x: len(clean(x.get_text(" "))))
+            title = clean(a.get_text(" "))
+            attrs = " ".join(str(v) for v in a.attrs.values())
+        else:
+            cand = []
+            for c in row.find_all(["td", "strong", "b", "h3", "h4", "h5", "dt", "p", "span", "div"]):
+                t = clean(c.get_text(" "))
+                if len(t) < 6 or re.search(DATE_RE, t) or re.fullmatch(r"[\d\s.\-/~:]+", t):
+                    continue
+                cls = " ".join(c.get("class") or []).lower()
+                prefer = c.name in ("strong", "b", "h3", "h4", "h5", "dt") or any(k in cls for k in ("tit", "subj", "name"))
+                cand.append((prefer, len(t), t))
+            if not cand:
+                continue
+            title = max(cand)[2]
+            a = None
+            attrs = " ".join(str(v) for v in row.attrs.values())
+        title = re.split(r"\s*(?:담당부서|공고번호|신청기간|접수기간|모집기간|등록일)\s*:?", title)[0].strip()
+        title = re.sub(r"^(?:\[?(?:공고|모집|접수중|마감|진행중|공지|NEW|new)\]?\s*)+", "", title).strip()
+        if len(title) < 6:
+            continue
+        dated += 1
+        hits = match(title)
+        if not hits and not take_all:
+            continue
+        pm = re.search(f"({DATE_RE})\\s*~\\s*({DATE_RE})", text)
+        period = f"{_ymd(pm.group(1))} ~ {_ymd(pm.group(2))}" if pm else ""
+        rest = [d for d in dates if not pm or d not in (pm.group(1), pm.group(2))]
+        posted = _ymd(rest[-1]) if rest else (_ymd(pm.group(1)) if pm else "")
+        num = re.search(r"(?<!\d)(\d{3,12})(?!\d)", attrs)
+        uid = num.group(1) if num else short_hash(title)
+        href = (a.get("href") if a is not None else "") or ""
+        usable = href and not href.startswith("#") and not href.lower().startswith("javascript")
+        link = urljoin(base_url, href) if usable else base_url
+        if uid in seen:
+            continue
+        seen.add(uid)
+        items.append({
+            "id": f"{id_prefix}:{uid}", "source": source, "title": title, "url": link,
+            "org": "", "period": period, "posted": posted, "keywords": hits,
+            "ministry": "중소벤처기업부" if "smart-factory.kr" in base_url else "",
+        })
+    return items, dated
+
+
+def fetch_kosmo(session, board_cfg, match, take_all):
+    url = board_cfg["url"]
+    name = board_cfg["name"]
+    r = http_get(session, url)
+    r.encoding = r.apparent_encoding or "utf-8"
+    items, dated = parse_board(r.text, url, name, "kosmo-" + short_hash(url)[:4], match, take_all)
+    if dated == 0:
+        log(f"  (진단) {name}: {_board_diagnose(r.text)}")
+        raise RuntimeError("목록에서 공고 줄을 찾지 못했습니다. 화면을 자바스크립트로 그리는 게시판일 수 있습니다.")
+    log(f"  {name}: 게시글 {dated}건 확인")
+    if items:
+        log(f"  (참고) 첫 게시글: {items[0]['title'][:60]} / {items[0]['posted']} / {items[0]['url'][:80]}")
+    return items
+
+
+IRIS_LIST = "https://www.iris.go.kr/contents/retrieveBsnsAncmBtinSituListView.do"
+IRIS_VIEW = "https://www.iris.go.kr/contents/retrieveBsnsAncmView.do?ancmPrg={prg}&ancmId={id}"
+
+
+def _iris_status(text: str) -> str:
+    if "예정" in text:
+        return "접수예정"
+    if "마감" in text or "종료" in text:
+        return "마감"
+    if "접수중" in text or "진행" in text:
+        return "접수중"
+    return ""
+
+
+def _iris_blocks(soup):
+    """'공고일자'가 들어 있는 가장 작은 목록 단위(li/tr, 없으면 div)를 찾습니다."""
+    for tags in (["li", "tr"], ["div"]):
+        found = [el for el in soup.find_all(tags)
+                 if "공고일자" in el.get_text()
+                 and not any("공고일자" in c.get_text() for c in el.find_all(tags))]
+        if found:
+            return found
+    return []
+
+
+def _iris_detail_period(session, url: str) -> str:
+    try:
+        r = http_get(session, url)
+        r.encoding = r.apparent_encoding or "utf-8"
+        text = clean(BeautifulSoup(r.text, "html.parser").get_text(" "))
+        m = re.search(f"(?:접수기간|신청기간|공모기간)[^0-9]{{0,20}}({DATE_RE})[^0-9]{{0,12}}~\\s*({DATE_RE})", text)
+        return f"{_ymd(m.group(1))} ~ {_ymd(m.group(2))}" if m else ""
+    except Exception as e:  # noqa: BLE001
+        log(f"  (참고) IRIS 상세 기간 읽기 실패: {e}")
+        return ""
+
+
+def fetch_iris(session, cfg, match, seen_ids):
+    urls = cfg.get("urls") or [IRIS_LIST]
+    allow = [norm(m) for m in cfg.get("take_all_ministries") or []]
+    items, seen, found, errors = [], set(), 0, []
+    for url in urls:
+        try:
+            r = http_get(session, url)
+        except Exception as e:  # noqa: BLE001
+            errors.append(str(e))
+            continue
+        r.encoding = r.apparent_encoding or "utf-8"
+        soup = BeautifulSoup(r.text, "html.parser")
+        for block in _iris_blocks(soup):
+            text = clean(block.get_text(" "))
+            if len(text) > 700:
+                continue
+            found += 1
+            org = re.match(r"^(.+?)\s*>\s*(\S+)", text)
+            ministry, agency = (clean(org.group(1)), clean(org.group(2))) if org else ("", "")
+            cands = [clean(t.get_text(" ")) for t in block.find_all(["strong", "b", "a", "h3", "h4", "p"])]
+            cands = [c for c in cands if len(c) >= 8 and "공고번호" not in c and "공고일자" not in c and ">" not in c]
+            if cands:
+                title = max(cands, key=len)
+            else:
+                m = re.search(r">\s*\S+\s+(.+?)\s+공고번호", text)
+                title = clean(m.group(1)) if m else ""
+            if len(title) < 6:
+                continue
+            posted = re.search(f"공고일자\\s*:?\\s*({DATE_RE})", text)
+            status = _iris_status((re.search(r"공고상태\s*:?\s*(\S+)", text) or [None, text])[1])
+            attrs = " ".join(str(v) for el in [block] + block.find_all(True) for v in el.attrs.values())
+            idm = re.search(r"ancmId\W{0,3}(\d{4,8})", attrs) or re.search(r"['\"](\d{6})['\"]", attrs)
+            aid = idm.group(1) if idm else short_hash(title)
+            if aid in seen:
+                continue
+            seen.add(aid)
+            hits = match(title)
+            take = any(a and a in norm(ministry) for a in allow)
+            if not hits and not take:
+                continue
+            prg = {"접수예정": "ancmPre", "마감": "ancmEnd"}.get(status, "ancmIng")
+            link = IRIS_VIEW.format(prg=prg, id=aid) if idm else url
+            items.append({
+                "id": f"iris:{aid}", "source": "IRIS", "title": title, "url": link,
+                "org": " / ".join(x for x in [ministry, agency] if x), "ministry": ministry,
+                "period": "", "posted": _ymd(posted.group(1)) if posted else "",
+                "status": status, "keywords": hits,
+            })
+    if found == 0:
+        if errors:
+            raise RuntimeError(f"IRIS 접속 실패: {errors[0]}")
+        raise RuntimeError("IRIS 목록에서 공고를 찾지 못했습니다. 화면 구조가 바뀌었을 수 있습니다.")
+    # 처음 보는 공고만 상세 페이지에서 접수기간을 읽어 옴 (한 번에 최대 10건)
+    if cfg.get("fetch_detail", True):
+        fresh = [it for it in items if it["id"] not in seen_ids and "ancmId=" in it["url"]][:10]
+        for it in fresh:
+            it["period"] = _iris_detail_period(session, it["url"])
+    log(f"  IRIS: 공고 {found}건 확인")
     return items
 
 
@@ -324,12 +546,17 @@ def dashboard_url(cfg) -> str:
 
 def _item_block_tg(it) -> str:
     e = html.escape
-    tag = f"[{' / '.join(it.get('groups') or [])}] " if it.get("groups") else ""
+    from dashboard import ministry_badge  # 같은 폴더의 dashboard.py
+    mname = ministry_badge(it)[0]
+    parts = ([mname] if mname else []) + list(it.get("groups") or [])
+    tag = f"[{' / '.join(parts)}] " if parts else ""
     lines = [f"<b>{e(tag + it['title'])}</b>"]
     if it.get("org"):
         lines.append(e(it["org"]))
     if it.get("period"):
         lines.append(f"신청기간 {e(it['period'])}")
+    elif it.get("status"):
+        lines.append(f"상태 {e(it['status'])}")
     lines.append(f"키워드 {e(', '.join(it.get('keywords', [])))}")
     lines.append(f'<a href="{e(it["url"], quote=True)}">공고 보기</a> ({e(it["source"])})')
     return "\n".join(lines)
@@ -456,7 +683,7 @@ def sort_key(it):
 def classify_item(matcher, it) -> None:
     text = " ".join([it.get("title", ""), it.get("tags", ""), " ".join(it.get("keywords") or [])])
     labels, groups = matcher.classify(text)
-    it["groups"] = groups
+    it["groups"] = groups or ["기타"]
     if labels:
         it["keywords"] = labels
 
@@ -476,7 +703,7 @@ def render_dashboard(cfg, state, matcher) -> None:
     page = render(
         title=(cfg.get("dashboard") or {}).get("title") or "공고 감시",
         items=state["items"],
-        groups=matcher.names,
+        groups=matcher.names + (["기타"] if any("기타" in (it.get("groups") or []) for it in state["items"]) else []),
         sources=state["sources"],
         updated=state.get("updated", ""),
         repo=repo,
@@ -492,7 +719,7 @@ def render_dashboard(cfg, state, matcher) -> None:
 
 
 # ───────────────────────── 실행 ─────────────────────────
-def build_sources(cfg, session, match):
+def build_sources(cfg, session, match, state=None):
     src = cfg.get("sources") or {}
     out = []
     biz = src.get("bizinfo") or {}
@@ -501,6 +728,16 @@ def build_sources(cfg, session, match):
     mss = src.get("mss") or {}
     if mss.get("enabled", True):
         out.append(("중기부 누리집", lambda: fetch_mss(session, mss, match)))
+    kosmo = src.get("kosmo") or {}
+    if kosmo.get("enabled", False):
+        take_all = bool(kosmo.get("take_all", True))
+        for b in kosmo.get("boards") or []:
+            if b and b.get("url") and b.get("name"):
+                out.append((b["name"], lambda b=b: fetch_kosmo(session, b, match, take_all)))
+    iris_cfg = src.get("iris") or {}
+    if iris_cfg.get("enabled", False):
+        seen_ids = set((state or {}).get("seen", {}))
+        out.append(("IRIS", lambda: fetch_iris(session, iris_cfg, match, seen_ids)))
     for page in src.get("pages") or []:
         if page and page.get("url") and page.get("name"):
             out.append((page["name"], lambda p=page: fetch_page(session, p, match)))
@@ -538,9 +775,10 @@ def run(cfg, dry_run=False) -> int:
         changed = True
         log("중기부 게시판 기록을 정리하고 다시 확인합니다.")
 
-    existing_by_key = {it.get("tkey"): it for it in state["items"] if it.get("tkey")}
+    for it in state["items"]:          # 비교 규칙이 바뀌어도 예전 기록과 맞도록 다시 계산
+        it["tkey"] = title_key(it.get("title", ""))
 
-    for name, fetch in build_sources(cfg, session, match):
+    for name, fetch in build_sources(cfg, session, match, state):
         st = state["sources"].setdefault(name, {"initialized": False, "fails": 0})
         try:
             items = fetch()
@@ -570,7 +808,7 @@ def run(cfg, dry_run=False) -> int:
             tk = title_key(it["title"])
             it["tkey"] = tk
             it["found_at"] = stamp
-            twin = existing_by_key.get(tk) or run_keys.get(tk)
+            twin = find_twin(tk, state["items"]) or find_twin(tk, run_keys.values())
             if twin:
                 dup_links.append((it["id"], {"tkey": tk, "source": it["source"], "url": it["url"], "twin": twin}))
                 continue
@@ -628,9 +866,10 @@ def run(cfg, dry_run=False) -> int:
     if state.get("cfg_hash") != cfg_id:
         state["cfg_hash"] = cfg_id
         changed = True
-    # 대시보드 설정(제목 등)만 바꿔도 바로 다시 그리도록
-    dash_id = hashlib.sha1(json.dumps(cfg.get("dashboard") or {}, ensure_ascii=False,
-                                      sort_keys=True).encode("utf-8")).hexdigest()[:12]
+    # 대시보드 설정(제목 등)이나 dashboard.py만 바꿔도 바로 다시 그리도록
+    dash_src = (ROOT / "dashboard.py").read_bytes() if (ROOT / "dashboard.py").exists() else b""
+    dash_id = hashlib.sha1(json.dumps(cfg.get("dashboard") or {}, ensure_ascii=False, sort_keys=True).encode("utf-8")
+                           + dash_src).hexdigest()[:12]
     if state.get("dash_hash") != dash_id:
         state["dash_hash"] = dash_id
         changed = True

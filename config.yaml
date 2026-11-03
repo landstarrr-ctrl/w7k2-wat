@@ -92,7 +92,8 @@ groups:
       - 멘토단 + 제조|DX|스마트
       - 스마트서비스
       - R&D + 제조|공정|스마트|로봇|자동화|AI
-      - 기술개발 + 제조|공정|스마트|로봇|자동화|AI
+      - 기술개발 + 제조|공정|스마트|로봇|자동화|AI|산업|기계|장비
+      - 산업기술개발
 
 # 제목에 아래 단어가 있으면 키워드가 맞아도 제외합니다.
 # 예) - 선정결과    - 합격자    (지금은 놓치지 않도록 비워 둠)
@@ -112,6 +113,31 @@ sources:
   mss:
     enabled: true
     url: https://www.mss.go.kr/site/smba/ex/bbs/List.do?cbIdx=310
+
+  # KOSMO(스마트제조혁신추진단) 스마트공장 사업관리시스템 게시판
+  # take_all: true → 키워드와 상관없이 모든 글을 수집하고, 키워드는 탭 분류에만 사용
+  #                  (키워드에 안 맞는 글은 '기타' 탭으로)
+  kosmo:
+    enabled: true
+    take_all: true
+    boards:
+      - name: KOSMO 사업공고
+        url: https://www.smart-factory.kr/usr/bg/ba/ma/bsnsPbanc
+      - name: KOSMO 모집공고
+        url: https://www.smart-factory.kr/usr/bg/ra/ma/rcrtPbanc
+
+  # IRIS 범부처통합연구지원시스템 > 사업공고 (정부 R&D 공고)
+  # take_all_ministries에 적힌 부처 공고는 전부, 나머지 부처는 키워드에 맞는 것만 수집
+  iris:
+    enabled: true
+    urls:
+      - https://www.iris.go.kr/contents/retrieveBsnsAncmBtinSituListView.do
+      - https://www.iris.go.kr/contents/retrieveBsnsAncmBtinSituListView.do?ancmPrg=ancmPre
+    take_all_ministries:
+      - 산업통상부
+      - 산업통상자원부
+      - 중소벤처기업부
+    fetch_detail: true    # 새 공고는 상세 페이지에서 접수기간을 읽어 옴
 
   # 그 밖에 감시할 게시판 목록 주소 (선택)
   pages: []
