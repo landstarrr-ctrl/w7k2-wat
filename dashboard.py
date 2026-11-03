@@ -28,10 +28,11 @@ CSS = """
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--paper);color:var(--ink);
-  font-family:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,Roboto,
+    "Helvetica Neue","Segoe UI","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
   font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
 .wrap{max-width:880px;margin:0 auto;padding:40px 20px 80px}
-header h1{font-size:30px;line-height:1.25;font-weight:700;letter-spacing:-.02em;margin:0 0 8px}
+header h1{font-size:30px;line-height:1.25;font-weight:800;letter-spacing:-.03em;margin:0 0 8px}
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;
   padding-bottom:12px;border-bottom:1px solid var(--rule)}
 .clock{font-variant-numeric:tabular-nums;font-size:14px;color:var(--muted);letter-spacing:.01em}
@@ -50,7 +51,7 @@ header p{margin:0;color:var(--muted);max-width:60ch}
 .status img{height:20px;vertical-align:middle}
 .status .bad{color:var(--seal)}
 .tools{margin:32px 0 8px;display:flex;flex-direction:column;gap:12px}
-.search{width:100%;font:inherit;padding:12px 14px;border:1px solid var(--rule);border-radius:6px;
+.search{width:100%;font:inherit;font-family:inherit;padding:12px 14px;border:1px solid var(--rule);border-radius:6px;
   background:var(--sheet);color:var(--ink)}
 .search:focus-visible,a:focus-visible{outline:2px solid var(--link);outline-offset:2px}
 .tabs{display:flex;flex-wrap:wrap;gap:2px;overflow-x:auto;border-bottom:1px solid var(--rule);
@@ -307,9 +308,8 @@ def render(*, title, items, groups, sources, updated, repo, new_hours, now) -> s
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{E(title)}</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📮</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <script>
 (function(){{try{{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();
 </script>
