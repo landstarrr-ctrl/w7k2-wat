@@ -630,6 +630,7 @@ def parse_kosmo_blocks(html, base_url, source, kid, match, take_all):
         seen.add(uid)
         items.append({
             "id": f"{kid}:{uid}", "source": source, "title": title, "url": base_url, "org": "",
+            "notice_no": clean(no.group(1)) if no else "",
             "period": f"{_ymd(pm.group(1))} ~ {_ymd(pm.group(2))}" if pm else "",
             "posted": _ymd(pd.group(1)) if pd else "", "keywords": hits,
             "status": next((w for w in ("접수예정", "접수중", "접수마감", "마감") if w in text), ""),
@@ -685,9 +686,12 @@ def parse_kosmo_json(captured, base_url, source, kid, match, take_all):
                 dated_rows += 1
                 idk = next((strs[k] for k in strs if re.search(r"(sn|id|no|seq)$", k, re.I)
                             and re.fullmatch(r"[\w\-]{1,30}", strs[k])), "")
+                notice_no = next((strs[k] for k in strs if re.search(r"no$", k, re.I)
+                                  and re.search(r"제?\s*\d{4}", strs[k]) and len(strs[k]) <= 60
+                                  and re.search("[가-힣]", strs[k])), "")
                 rows.append({
                     "id": f"{kid}:{idk or short_hash(title)}", "source": source, "title": title,
-                    "url": base_url, "org": "",
+                    "url": base_url, "org": "", "notice_no": notice_no,
                     "period": f"{begin} ~ {end}" if begin and end else "", "posted": posted,
                     "keywords": match(title), "ministry": "중소벤처기업부", "status": "",
                 })
@@ -807,7 +811,7 @@ def fetch_kosmo(session, board_cfg, match, take_all):
             log(f"  (참고) {name}: 가로챈 내부 데이터 주소 {[c[0].split('?')[0].replace('https://', '')[-70:] for c in captured][:8]}")
         if html is None and not captured:
             raise RuntimeError("목록을 읽지 못했습니다(일반 접속·브라우저 접속 모두 실패)")
-        url = burl or board_cfg["url"]
+        url = board_cfg["url"]            # 공고 링크는 항상 공식(www) 게시판 주소로
         items, dated = parse_board(html or "", url, name, kid, match, take_all)
         if dated == 0 and html:
             items, dated = parse_kosmo_blocks(html, url, name, kid, match, take_all)
@@ -1299,8 +1303,15 @@ def run(cfg, dry_run=False, only=None) -> int:
 
         first_time = not st.get("initialized")
         count_new = 0
+        by_id = {x["id"]: x for x in state["items"]}
         for it in items:
             if it["id"] in state["seen"]:
+                old = by_id.get(it["id"])
+                if old:
+                    for f in ("period", "status", "notice_no", "posted"):
+                        if it.get(f) and it.get(f) != old.get(f):
+                            old[f] = it[f]
+                            changed = True
                 continue
             tk = title_key(it["title"])
             it["tkey"] = tk
