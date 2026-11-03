@@ -628,6 +628,12 @@ def run(cfg, dry_run=False) -> int:
     if state.get("cfg_hash") != cfg_id:
         state["cfg_hash"] = cfg_id
         changed = True
+    # 대시보드 설정(제목 등)만 바꿔도 바로 다시 그리도록
+    dash_id = hashlib.sha1(json.dumps(cfg.get("dashboard") or {}, ensure_ascii=False,
+                                      sort_keys=True).encode("utf-8")).hexdigest()[:12]
+    if state.get("dash_hash") != dash_id:
+        state["dash_hash"] = dash_id
+        changed = True
     if baseline_notes:
         notes = baseline_notes + ["지금부터 새로 올라오는 공고만 알려 드립니다."]
         notify(cfg, "공고 감시를 시작했습니다", notes=notes)

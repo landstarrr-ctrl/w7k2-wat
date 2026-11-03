@@ -117,6 +117,6 @@ sources:
   pages: []
 
 dashboard:
-  title: 스마트제조혁신 공고 감시
+  title: 정부지원과제 모니터링 시스템
   keep: 500               # 대시보드에 남길 최대 공고 수
   url: ""
