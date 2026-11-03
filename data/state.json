@@ -1,8 +1,76 @@
 {
  "seen": {
-  "mss:a8b61522ad00": "2027년스마트제조혁신지원사업통합공고"
+  "mss:a8b61522ad00": "2027년스마트제조혁신지원사업통합공고",
+  "bizinfo:PBLN_000000000127589": "2027년스마트제조혁신지원사업통합공고",
+  "bizinfo:PBLN_000000000127588": "2027년고성장혁신형기업모집공고",
+  "bizinfo:PBLN_000000000127585": "경기2026년3차제조로봇도입실증지원사업공고",
+  "bizinfo:PBLN_000000000127576": "전남광주산업디지털전환협업지원센터현장밀착형ax컨설팅및마스터플랜수립지원사업공고",
+  "bizinfo:PBLN_000000000127571": "경남2026년3차뿌리기업맞춤형제조로봇공정연구및보급사업지원대상기업모집공고",
+  "bizinfo:PBLN_000000000127536": "경북2026년지역특화형방산모빌리티스마트공장보급확산사업기초단계참여기업모집연장공고",
+  "bizinfo:PBLN_000000000127380": "전북김제시2026년5차지역특화형농식품기업스마트공장구축지원사업공고"
  },
  "items": [
+  {
+   "id": "bizinfo:PBLN_000000000127588",
+   "source": "기업마당",
+   "title": "2027년 고성장 혁신형 기업 모집 공고",
+   "url": "https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000127588",
+   "org": "중소벤처기업부 / 한국경영혁신중소기업협회",
+   "period": "2026-10-28 ~ 2026-11-11",
+   "posted": "2026-10-30",
+   "keywords": [
+    "피지컬AI"
+   ],
+   "tkey": "2027년고성장혁신형기업모집공고",
+   "found_at": "2026-11-03T12:06+09:00",
+   "baseline": true
+  },
+  {
+   "id": "bizinfo:PBLN_000000000127585",
+   "source": "기업마당",
+   "title": "[경기] 2026년 3차 제조로봇 도입ㆍ실증 지원 사업 공고",
+   "url": "https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000127585",
+   "org": "경기도 / 경기테크노파크",
+   "period": "2026-10-29 ~ 2026-11-04",
+   "posted": "2026-10-30",
+   "keywords": [
+    "제조로봇",
+    "로봇 도입"
+   ],
+   "tkey": "경기2026년3차제조로봇도입실증지원사업공고",
+   "found_at": "2026-11-03T12:06+09:00",
+   "baseline": true
+  },
+  {
+   "id": "bizinfo:PBLN_000000000127576",
+   "source": "기업마당",
+   "title": "[전남광주] 산업 디지털전환 협업지원센터 현장 밀착형 AX 컨설팅 및 마스터플랜 수립 지원사업 공고",
+   "url": "https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000127576",
+   "org": "전남광주통합특별시 / 광주테크노파크",
+   "period": "2026-10-29 ~ 2026-11-04",
+   "posted": "2026-10-30",
+   "keywords": [
+    "제조AI"
+   ],
+   "tkey": "전남광주산업디지털전환협업지원센터현장밀착형ax컨설팅및마스터플랜수립지원사업공고",
+   "found_at": "2026-11-03T12:06+09:00",
+   "baseline": true
+  },
+  {
+   "id": "bizinfo:PBLN_000000000127571",
+   "source": "기업마당",
+   "title": "[경남] 2026년 3차 뿌리기업 맞춤형 제조로봇 공정연구 및 보급사업 지원대상기업 모집 공고",
+   "url": "https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000127571",
+   "org": "경상남도 / 경남테크노파크",
+   "period": "2026-10-29 ~ 2026-11-09",
+   "posted": "2026-10-30",
+   "keywords": [
+    "제조로봇"
+   ],
+   "tkey": "경남2026년3차뿌리기업맞춤형제조로봇공정연구및보급사업지원대상기업모집공고",
+   "found_at": "2026-11-03T12:06+09:00",
+   "baseline": true
+  },
   {
    "id": "mss:a8b61522ad00",
    "source": "중기부 누리집",
@@ -16,13 +84,51 @@
    "posted": "2026-10-30",
    "tkey": "2027년스마트제조혁신지원사업통합공고",
    "found_at": "2026-11-03T11:36+09:00",
+   "baseline": true,
+   "links": [
+    {
+     "source": "기업마당",
+     "url": "https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000127589"
+    }
+   ]
+  },
+  {
+   "id": "bizinfo:PBLN_000000000127536",
+   "source": "기업마당",
+   "title": "[경북] 2026년 지역특화형(방산ㆍ모빌리티) 스마트공장 보급확산 사업(기초단계) 참여기업 모집 연장 공고",
+   "url": "https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000127536",
+   "org": "경상북도 / 경북테크노파크",
+   "period": "2026-10-12 ~ 2026-11-09",
+   "posted": "2026-10-29",
+   "keywords": [
+    "스마트공장",
+    "스마트제조"
+   ],
+   "tkey": "경북2026년지역특화형방산모빌리티스마트공장보급확산사업기초단계참여기업모집연장공고",
+   "found_at": "2026-11-03T12:06+09:00",
+   "baseline": true
+  },
+  {
+   "id": "bizinfo:PBLN_000000000127380",
+   "source": "기업마당",
+   "title": "[전북] 김제시 2026년 5차 지역특화형(농ㆍ식품기업) 스마트공장 구축지원 사업 공고",
+   "url": "https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000127380",
+   "org": "중소벤처기업부 / 전북테크노파크",
+   "period": "모집 완료시까지",
+   "posted": "2026-10-21",
+   "keywords": [
+    "스마트공장"
+   ],
+   "tkey": "전북김제시2026년5차지역특화형농식품기업스마트공장구축지원사업공고",
+   "found_at": "2026-11-03T12:06+09:00",
    "baseline": true
   }
  ],
  "sources": {
   "기업마당": {
-   "initialized": false,
-   "fails": 0
+   "initialized": true,
+   "fails": 0,
+   "ok_at": "2026-11-03"
   },
   "중기부 누리집": {
    "initialized": true,
@@ -31,6 +137,6 @@
   }
  },
  "heartbeat": "2026-11-03",
- "updated": "2026-11-03T11:36+09:00",
+ "updated": "2026-11-03T12:06+09:00",
  "fix": "mss-v3"
 }
