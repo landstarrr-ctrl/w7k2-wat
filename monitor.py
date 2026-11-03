@@ -394,12 +394,54 @@ def parse_board(html, base_url, source, id_prefix, match, take_all):
     return items, dated
 
 
+KOSMO_HOME = "https://www.smart-factory.kr/"
+BROWSER_HEADERS = {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
+    "Upgrade-Insecure-Requests": "1",
+}
+
+
+def _kosmo_candidates(url: str):
+    """같은 게시판의 다른 주소 표기(예전 철자, .do)도 시도합니다."""
+    cands = [url]
+    for a, b in (("Pbanc", "Pblanc"), ("Pblanc", "Pbanc")):
+        if a in url:
+            cands.append(url.replace(a, b))
+    cands += [c + ".do" for c in list(cands) if not c.endswith(".do") and "?" not in c]
+    return list(dict.fromkeys(cands))
+
+
 def fetch_kosmo(session, board_cfg, match, take_all):
     url = board_cfg["url"]
     name = board_cfg["name"]
-    r = http_get(session, url)
+    # 사람처럼 첫 화면을 먼저 열어 쿠키(접속 기록)를 받아 둠
+    if not getattr(session, "_kosmo_warm", False):
+        try:
+            h = session.get(KOSMO_HOME, timeout=30, headers=BROWSER_HEADERS)
+            log(f"  {name}: 첫 화면 접속 {h.status_code}")
+        except requests.RequestException as e:
+            log(f"  {name}: 첫 화면 접속 실패 {e}")
+        session._kosmo_warm = True
+    tried, r = [], None
+    for cand in _kosmo_candidates(url):
+        try:
+            resp = session.get(cand, timeout=30, headers={**BROWSER_HEADERS, "Referer": KOSMO_HOME})
+        except requests.RequestException as e:
+            tried.append(f"{cand.split('smart-factory.kr')[-1]} → {type(e).__name__}")
+            continue
+        tried.append(f"{cand.split('smart-factory.kr')[-1]} → {resp.status_code}")
+        if resp.status_code == 200:
+            r, url = resp, cand
+            break
+        time.sleep(1)
+    log(f"  {name}: 시도한 주소 {tried}")
+    if r is None:
+        raise RuntimeError("목록 페이지를 열지 못했습니다(" + ", ".join(tried) + ")")
     r.encoding = r.apparent_encoding or "utf-8"
-    items, dated = parse_board(r.text, url, name, "kosmo-" + short_hash(url)[:4], match, take_all)
+    if "login" in r.url.lower() or "로그인" in (BeautifulSoup(r.text, "html.parser").title or "").__str__():
+        log(f"  (진단) {name}: 로그인 화면으로 이동됨 → {r.url}")
+    items, dated = parse_board(r.text, url, name, "kosmo-" + short_hash(board_cfg["url"])[:4], match, take_all)
     if dated == 0:
         log(f"  (진단) {name}: {_board_diagnose(r.text)}")
         raise RuntimeError("목록에서 공고 줄을 찾지 못했습니다. 화면을 자바스크립트로 그리는 게시판일 수 있습니다.")
