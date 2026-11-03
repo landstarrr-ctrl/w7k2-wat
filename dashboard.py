@@ -50,6 +50,9 @@ header p{margin:0;color:var(--muted);max-width:60ch}
   font-size:14px;color:var(--muted)}
 .status img{height:20px;vertical-align:middle}
 .status .bad{color:var(--seal)}
+.minilegend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:10px 0 0;font-size:12px;color:var(--muted)}
+.minilegend .lg{display:inline-flex;align-items:center;gap:6px}
+.minilegend i{width:10px;height:10px;border-radius:3px;display:inline-block}
 .legend{font-size:13px;line-height:1.7;color:var(--muted);margin:0 0 14px;padding:10px 14px;
   border:1px solid var(--rule);border-left:3px solid var(--rule);border-radius:6px;background:var(--sheet)}
 .legend b{color:var(--ink);font-weight:600}
@@ -82,9 +85,14 @@ header p{margin:0;color:var(--muted);max-width:60ch}
 .opts{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
 .opts input{width:16px;height:16px;accent-color:var(--ink)}
 li.is-closed .title,li.is-closed .date{opacity:.5}
-li.row{border-left:4px solid transparent}
-li.m-mss{border-left-color:var(--mss)} li.m-motie{border-left-color:var(--motie)}
-li.m-msit{border-left-color:var(--msit)} li.m-multi{border-left-color:var(--multi)} li.m-local{border-left-color:var(--local)}
+li.row{position:relative;border-left:none;--mc:var(--rule);--mcbg:transparent}
+li.row::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:6px;border-radius:0 4px 4px 0;
+  background:var(--mc)}
+li.row{background:linear-gradient(90deg,var(--mcbg) 0,transparent 120px) var(--card)}
+li.row .date{color:var(--mc)}
+li.m-mss{--mc:var(--mss);--mcbg:var(--mss-bg)} li.m-motie{--mc:var(--motie);--mcbg:var(--motie-bg)}
+li.m-msit{--mc:var(--msit);--mcbg:var(--msit-bg)} li.m-multi{--mc:var(--multi);--mcbg:var(--multi-bg)}
+li.m-local{--mc:var(--local);--mcbg:var(--local-bg)}
 .badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:5px}
 .pill{font-size:12px;font-weight:600;line-height:1.5;padding:1px 8px;border-radius:4px;white-space:nowrap}
 .pill.mss{color:var(--mss);background:var(--mss-bg)} .pill.motie{color:var(--motie);background:var(--motie-bg)}
@@ -109,7 +117,7 @@ ol.list{list-style:none;margin:0;padding:0;background:var(--sheet);border-radius
 li.row{position:relative;display:grid;grid-template-columns:64px 1fr;gap:14px;
   padding:16px 88px 16px 14px;border-bottom:1px solid var(--rule)}
 li.row:last-child{border-bottom:0}
-.date{font-variant-numeric:tabular-nums;font-size:20px;font-weight:600;line-height:1.2;color:var(--ink)}
+.date{font-variant-numeric:tabular-nums;font-size:20px;font-weight:700;line-height:1.2;color:var(--ink)}
 .date small{display:block;font-size:12px;font-weight:400;color:var(--muted)}
 .title{font-size:16px;font-weight:600;color:var(--link);text-decoration:none}
 .title:hover{text-decoration:underline}
@@ -280,6 +288,9 @@ def _row(it) -> str:
     )
 
 
+MINISTRY_LEGEND = [("중기부", "mss"), ("산업부", "motie"), ("과기정통부", "msit"), ("다부처", "multi"), ("지자체·기타", "local")]
+
+
 def render(*, title, items, groups, sources, updated, repo, new_hours, now, kosmo=None, tab_title=None, description=None) -> str:
     months: "OrderedDict[str, list]" = OrderedDict()
     for it in items:
@@ -295,6 +306,8 @@ def render(*, title, items, groups, sources, updated, repo, new_hours, now, kosm
             f'<a href="https://github.com/{E(repo)}/actions" target="_blank" rel="noopener">'
             f'<img src="https://github.com/{E(repo)}/actions/workflows/monitor.yml/badge.svg" alt="감시 작동 상태"></a>')
     kosmo = kosmo or {}
+    legend_html = "".join(f'<span class="lg"><i style="background:var(--{c})"></i>{n}</span>'
+                          for n, c in MINISTRY_LEGEND)
     knames = {b.get("name") for b in kosmo.get("boards") or []}
     for name, st in (sources or {}).items():
         if name in knames:
@@ -363,6 +376,7 @@ def render(*, title, items, groups, sources, updated, repo, new_hours, now, kosm
   <h1>{E(title)}</h1>
   {f"<p>{E(description)}</p>" if description else ""}
   <div class="status">{''.join(status)}</div>
+  <div class="minilegend" aria-label="부처 색 안내">{legend_html}</div>
   {kosmo_html}
 </header>
 <div class="tools">
