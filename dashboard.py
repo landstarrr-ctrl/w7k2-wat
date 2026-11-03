@@ -66,6 +66,7 @@ a.title.khelp:hover::before{content:"";position:absolute;left:16px;top:100%;marg
   border:1px solid var(--rule);border-left:3px solid var(--rule);border-radius:6px;background:var(--sheet)}
 .legend b{color:var(--ink);font-weight:600}
 .legend b.hot{color:var(--seal)}
+.legend .pill.lg-pill{display:inline-block;vertical-align:1px;margin:0 2px}
 .kosmo{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:14px;padding:10px 14px;
   border-radius:8px;border:1px solid var(--rule);background:var(--sheet);font-size:14px;color:var(--muted)}
 .kosmo .kdot{width:8px;height:8px;border-radius:50%;background:var(--open)}
@@ -419,7 +420,7 @@ def render(*, title, items, groups, sources, updated, repo, new_hours, now, kosm
   <div class="opts"><label class="opts"><input type="checkbox" id="hideClosed">마감된 공고 숨기기</label>
     <span id="count" aria-live="polite" style="margin-left:auto"></span></div>
 </div>
-<p class="legend"><b>신규</b> 표시는 이 감시 봇이 최근 {new_hours}시간 안에 처음 발견한 공고에 붙습니다(감시를 처음 시작할 때 이미 올라와 있던 공고는 제외). <b class="hot">마감 임박</b>은 접수 마감까지 14일 이내 남은 공고입니다. 신청 전에는 반드시 원문 공고를 확인하세요.</p>
+<p class="legend"><span class="pill new lg-pill">신규</span> 표시는 이 감시 봇이 최근 {new_hours}시간 안에 처음 발견한 공고에 붙습니다(감시를 처음 시작할 때 이미 올라와 있던 공고는 제외). <span class="pill st urgent lg-pill">마감 임박</span>은 접수 마감까지 14일 이내 남은 공고입니다. 신청 전에는 반드시 원문 공고를 확인하세요.</p>
 {body}
 </div>
 <script>
