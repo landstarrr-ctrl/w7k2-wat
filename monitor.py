@@ -466,12 +466,35 @@ window.chrome = window.chrome || {runtime: {}};
 
 
 def _kosmo_browser_fetch(urls, word):
-    """진짜 크롬으로 목록을 엽니다. 화면 있는 크롬 → 헤드리스 크롬 순서로 시도. (html, 주소, 기록) 반환."""
+    """진짜 크롬으로 목록을 엽니다. (html, 주소, 기록, 가로챈 JSON 목록) 반환."""
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
-        return None, None, ["브라우저 도구(playwright) 없음"]
-    tried = []
+        return None, None, ["브라우저 도구(playwright) 없음"], []
+    tried, captured = [], []
+
+    def on_response(resp):
+        try:
+            ctype = (resp.headers or {}).get("content-type", "")
+            if "json" not in ctype or resp.status != 200 or len(captured) >= 40:
+                return
+            body = resp.body()
+            if len(body) > 3_000_000:
+                return
+            captured.append((resp.url, json.loads(body.decode("utf-8", "replace"))))
+        except Exception:  # noqa: BLE001
+            pass
+
+    def settle(page):
+        try:
+            page.wait_for_load_state("networkidle", timeout=12000)
+        except Exception:  # noqa: BLE001
+            pass
+        try:
+            page.wait_for_selector("text=접수기간", timeout=12000)
+        except Exception:  # noqa: BLE001
+            page.wait_for_timeout(3000)
+
     modes = [
         ("화면 있는 크롬", {"channel": "chrome", "headless": False,
                          "args": ["--disable-blink-features=AutomationControlled", "--window-position=-2400,-2400",
@@ -498,6 +521,7 @@ def _kosmo_browser_fetch(urls, word):
                 ctx = browser.new_context(**ctx_opts)
                 ctx.add_init_script(_STEALTH_JS)
                 page = ctx.new_page()
+                page.on("response", on_response)
                 # 사람이 주소창에 바로 붙여넣는 것처럼 목록부터 열어 보고, 안 되면 첫 화면을 거쳐서 다시
                 for step, targets in (("바로", urls), ("첫 화면 경유", urls)):
                     if step == "첫 화면 경유":
@@ -509,30 +533,129 @@ def _kosmo_browser_fetch(urls, word):
                     for u in targets:
                         try:
                             resp = page.goto(u, wait_until="domcontentloaded", timeout=45000)
-                            page.wait_for_timeout(3000)
+                            settle(page)
                         except Exception as e:  # noqa: BLE001
                             tried.append(f"{label}/{step} {u.replace('https://', '')} → {type(e).__name__}")
                             continue
                         html = page.content()
                         status = resp.status if resp else 0
                         tried.append(f"{label}/{step} {u.replace('https://', '')} → {status}")
-                        if status == 200 and re.search(DATE_RE, html):
-                            return html, u, tried
+                        if status == 200 and ("접수기간" in html or "공고일자" in html or captured):
+                            return html, u, tried, captured
                 # 마지막: 첫 화면 메뉴 글자를 눌러 들어가기
                 try:
                     page.goto(KOSMO_HOME, wait_until="domcontentloaded", timeout=45000)
                     page.wait_for_timeout(2500)
                     page.get_by_text(word, exact=True).first.click(timeout=8000, force=True)
-                    page.wait_for_timeout(4000)
+                    settle(page)
                     html = page.content()
                     tried.append(f"{label}/메뉴 '{word}' 클릭 → {page.url.replace('https://', '')}")
-                    if re.search(DATE_RE, html) and "공고" in html:
-                        return html, page.url, tried
+                    if "접수기간" in html or "공고일자" in html or captured:
+                        return html, page.url, tried, captured
                 except Exception as e:  # noqa: BLE001
                     tried.append(f"{label}/메뉴 클릭 실패: {type(e).__name__}")
             finally:
                 browser.close()
-    return None, None, tried
+    return None, None, tried, captured
+
+
+def _ymd_any(v: str) -> str:
+    v = str(v or "").strip()
+    m = re.match(r"(\d{4})[-./]?(\d{2})[-./]?(\d{2})", v)
+    return f"{m.group(1)}-{m.group(2)}-{m.group(3)}" if m else ""
+
+
+def parse_kosmo_blocks(html, base_url, source, kid, match, take_all):
+    """'공고일자'와 '접수기간'이 함께 든 가장 작은 상자를 공고 하나로 봅니다(표가 아닌 목록용)."""
+    soup = BeautifulSoup(html, "html.parser")
+    tags = ["tr", "li", "div", "article", "section", "a", "dl"]
+    must = ("공고일자", "접수기간")
+    texts = {}
+
+    def txt(el):
+        k = id(el)
+        if k not in texts:
+            texts[k] = el.get_text(" ")
+        return texts[k]
+
+    found = [el for el in soup.find_all(tags) if all(m in txt(el) for m in must)]
+    blocks = [el for el in found if not any(all(m in txt(c) for m in must) for c in el.find_all(tags))]
+    items, seen = [], set()
+    for el in blocks:
+        text = clean(txt(el))
+        if len(text) > 900:
+            continue
+        cands = [clean(a.get_text(" ")) for a in el.find_all(["a", "strong", "b", "h3", "h4", "p", "span", "div"])]
+        cands = [c for c in cands if 8 <= len(c) <= 200 and not re.search(r"공고일자|공고번호|접수기간|사업분류|세부공고|접수상태", c)]
+        title = max(cands, key=len) if cands else ""
+        if len(title) < 6:
+            continue
+        hits = match(title)
+        if not hits and not take_all:
+            continue
+        pm = re.search(f"접수기간\\s*:?\\s*({DATE_RE})(?:\\s*\\d{{1,2}}:\\d{{2}})?\\s*~\\s*({DATE_RE})", text)
+        pd = re.search(f"공고일자\\s*:?\\s*({DATE_RE})", text)
+        no = re.search(r"공고번호\s*:?\s*(.+?)\s*(?:\[|$|사업분류|접수)", text)
+        attrs = " ".join(str(v) for e in [el] + el.find_all(True) for v in e.attrs.values())
+        num = re.search(r"(?<!\d)(\d{5,14})(?!\d)", attrs)
+        uid = num.group(1) if num else short_hash(title, no.group(1) if no else "")
+        if uid in seen:
+            continue
+        seen.add(uid)
+        items.append({
+            "id": f"{kid}:{uid}", "source": source, "title": title, "url": base_url, "org": "",
+            "period": f"{_ymd(pm.group(1))} ~ {_ymd(pm.group(2))}" if pm else "",
+            "posted": _ymd(pd.group(1)) if pd else "", "keywords": hits,
+            "status": next((w for w in ("접수예정", "접수중", "접수마감", "마감") if w in text), ""),
+            "ministry": "중소벤처기업부",
+        })
+    return items, len(blocks)
+
+
+def _json_lists(o):
+    if isinstance(o, list):
+        if o and all(isinstance(x, dict) for x in o[:5]):
+            yield o
+        for x in o:
+            yield from _json_lists(x)
+    elif isinstance(o, dict):
+        for v in o.values():
+            yield from _json_lists(v)
+
+
+def parse_kosmo_json(captured, base_url, source, kid, match, take_all):
+    """크롬이 받아 온 내부 데이터(JSON)에서 공고 목록을 찾습니다. (공고, 진단 문구) 반환."""
+    best, best_note = [], ""
+    for api_url, data in captured:
+        for lst in _json_lists(data):
+            rows = []
+            for d in lst:
+                strs = {k: str(v) for k, v in d.items() if isinstance(v, (str, int)) and str(v).strip()}
+                tkeys = [k for k in strs if re.search(r"(nm|title|sj|subject|name)$", k, re.I)]
+                pool = [strs[k] for k in tkeys] or list(strs.values())
+                pool = [v for v in pool if len(v) >= 8 and re.search("[가-힣]", v) and not _ymd_any(v)]
+                if not pool:
+                    continue
+                title = max(pool, key=len)
+                if not re.search("공고|사업|모집|지원|선정|안내", title):
+                    continue
+                dates = {k: _ymd_any(v) for k, v in strs.items() if _ymd_any(v) and len(v) <= 19}
+                begin = next((v for k, v in dates.items() if re.search(r"bgng|begin|start|str|from|rcpt.*b", k, re.I)), "")
+                end = next((v for k, v in dates.items() if re.search(r"end|clos|ddln|to$|rcpt.*e", k, re.I)), "")
+                posted = next((v for k, v in dates.items() if re.search(r"reg|crt|pbanc|ntce|ntc|wrt|rgst|pst", k, re.I)), "")
+                posted = posted or (sorted(dates.values())[0] if dates else "")
+                idk = next((strs[k] for k in strs if re.search(r"(sn|id|no|seq)$", k, re.I) and re.fullmatch(r"[\w\-]{1,30}", strs[k])), "")
+                rows.append({
+                    "id": f"{kid}:{idk or short_hash(title)}", "source": source, "title": clean(title), "url": base_url,
+                    "org": "", "period": f"{begin} ~ {end}" if begin and end else "", "posted": posted,
+                    "keywords": match(title), "ministry": "중소벤처기업부", "status": "",
+                })
+            if len(rows) > len(best):
+                best = rows
+                best_note = f"{api_url.split('?')[0][-60:]} 항목 키 {list(lst[0].keys())[:12]}"
+    if not take_all:
+        best = [r for r in best if r["keywords"]]
+    return best, best_note
 
 
 def fetch_kosmo(session, board_cfg, match, take_all):
@@ -582,15 +705,27 @@ def fetch_kosmo(session, board_cfg, match, take_all):
             log(f"  (진단) {name}: 200 응답이지만 목록 없음 → {_board_diagnose(html)}, 본문 '{snippet}', 이동 지시 {scripts}")
     if dated == 0:
         # 일반 접속으로 목록을 못 읽으면 진짜 크롬으로 다시 시도
-        html, burl, btried = _kosmo_browser_fetch(
-            list(dict.fromkeys([board_cfg["url"], _swap_www(board_cfg["url"])] + menu)), word)
+        html, burl, btried, captured = _kosmo_browser_fetch(
+            list(dict.fromkeys([_swap_www(board_cfg["url"]) if "://www." in board_cfg["url"] else board_cfg["url"],
+                                board_cfg["url"], _swap_www(board_cfg["url"])] + menu)), word)
         log(f"  {name}: 브라우저 방식 {btried}")
-        if html is None:
+        if captured:
+            log(f"  (참고) {name}: 가로챈 내부 데이터 주소 {[c[0].split('?')[0].replace('https://', '')[-70:] for c in captured][:8]}")
+        if html is None and not captured:
             raise RuntimeError("목록을 읽지 못했습니다(일반 접속·브라우저 접속 모두 실패)")
-        url = burl
-        items, dated = parse_board(html, url, name, kid, match, take_all)
+        url = burl or board_cfg["url"]
+        items, dated = parse_board(html or "", url, name, kid, match, take_all)
+        if dated == 0 and html:
+            items, dated = parse_kosmo_blocks(html, url, name, kid, match, take_all)
+            if dated:
+                log(f"  {name}: 상자형 목록에서 읽음")
+        if dated == 0 and captured:
+            items, note = parse_kosmo_json(captured, url, name, kid, match, take_all)
+            dated = len(items)
+            log(f"  {name}: 내부 데이터에서 읽음 {dated}건 ({note})")
         if dated == 0:
-            log(f"  (진단) {name}: 브라우저로 연 페이지에도 목록 없음 → {_board_diagnose(html)}")
+            log(f"  (진단) {name}: 브라우저로 연 페이지에도 목록 없음 → {_board_diagnose(html or '')}, "
+                f"'접수기간' 글자 {'있음' if html and '접수기간' in html else '없음'}")
             raise RuntimeError("목록에서 공고 줄을 찾지 못했습니다.")
     log(f"  {name}: 게시글 {dated}건 확인")
     if items:
