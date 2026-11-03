@@ -904,24 +904,24 @@
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T13:21+09:00"
+   "ok_time": "2026-11-03T14:44+09:00"
   },
   "중기부 누리집": {
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T13:21+09:00"
+   "ok_time": "2026-11-03T14:44+09:00"
   },
   "IRIS": {
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T13:21+09:00"
+   "ok_time": "2026-11-03T14:44+09:00"
   }
  },
  "heartbeat": "2026-11-03",
- "updated": "2026-11-03T13:21+09:00",
+ "updated": "2026-11-03T14:44+09:00",
  "fix": "mss-v3",
  "cfg_hash": "17193d8d9f67",
- "dash_hash": "366960a74e2e"
+ "dash_hash": "fe6f0f534de9"
 }
