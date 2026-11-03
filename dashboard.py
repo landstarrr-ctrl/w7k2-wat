@@ -58,7 +58,13 @@ li.row{padding-right:46px}
 li.is-closed .fav{opacity:.6}
 .favlab{color:#C98A00;font-weight:600}
 :root[data-theme="dark"] .favlab{color:#F2C14E}
-.meta a.khelp{text-decoration:underline dotted;text-underline-offset:3px;cursor:help}
+a.title.khelp{position:relative}
+a.title.khelp:hover::after{content:attr(data-tip);position:absolute;left:0;top:100%;margin-top:7px;
+  width:max-content;max-width:min(360px,80vw);white-space:normal;z-index:6;
+  background:var(--ink);color:var(--card);font-size:12px;font-weight:500;line-height:1.5;
+  padding:7px 11px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,.18);pointer-events:none}
+a.title.khelp:hover::before{content:"";position:absolute;left:16px;top:100%;margin-top:2px;z-index:6;
+  border:5px solid transparent;border-bottom-color:var(--ink);pointer-events:none}
 .minilegend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:10px 0 0;font-size:12px;color:var(--muted)}
 .minilegend .lg{display:inline-flex;align-items:center;gap:6px}
 .minilegend i{width:10px;height:10px;border-radius:3px;display:inline-block}
@@ -276,7 +282,7 @@ def _month_label(ym: str) -> str:
     return ym
 
 
-KOSMO_TIP = "KOSMO는 공고별 고유 주소가 없는 사이트라 게시판 목록이 열립니다. 목록에서 공고번호나 제목으로 찾아 주세요."
+KOSMO_TIP = "공고별 주소가 없는 사이트라 게시판 목록이 열립니다 — 공고번호·제목으로 찾아 주세요"
 
 
 def _fix_url(u: str) -> str:
@@ -307,13 +313,9 @@ def _row(it) -> str:
         meta.append(f"<span><b>신청</b>{E(it['period'])}</span>")
     if it.get("notice_no"):
         meta.append(f"<span><b>공고번호</b>{E(it['notice_no'])}</span>")
-    def _a(url, label):
-        tip = f' class="khelp" title="{E(KOSMO_TIP, quote=True)}"' if "smart-factory.kr" in url else ""
-        return f'<a href="{E(_fix_url(url), quote=True)}"{tip} target="_blank" rel="noopener">{E(label)}</a>'
-
-    src = [_a(it["url"], it["source"])]
+    src = [f'<a href="{E(_fix_url(it["url"]), quote=True)}" target="_blank" rel="noopener">{E(it["source"])}</a>']
     for l in it.get("links") or []:
-        src.append(_a(l["url"], l["source"]))
+        src.append(f'<a href="{E(_fix_url(l["url"]), quote=True)}" target="_blank" rel="noopener">{E(l["source"])}</a>')
     meta.append(f"<span><b>출처</b>{', '.join(src)}</span>")
     return (
         f'<li class="row m-{mcls}" data-fid="{E(it.get("tkey") or it["id"], quote=True)}" data-found="{"" if it.get("baseline") else E(it.get("found_at", ""), quote=True)}" '
@@ -324,7 +326,8 @@ def _row(it) -> str:
         f'<div><div class="badges">{mpill}'
         f'<span class="pill st"></span>'
         f'<span class="pill new">신규</span></div>'
-        f'<a class="title" {"title=" + chr(34) + E(KOSMO_TIP, quote=True) + chr(34) + " " if "smart-factory.kr" in it["url"] else ""}href="{E(_fix_url(it["url"]), quote=True)}" target="_blank" rel="noopener">{E(it["title"])}</a>'
+        f'<a class="title{" khelp" if "smart-factory.kr" in it["url"] else ""}" '
+        f'{"data-tip=" + chr(34) + E(KOSMO_TIP, quote=True) + chr(34) + " " if "smart-factory.kr" in it["url"] else ""}href="{E(_fix_url(it["url"]), quote=True)}" target="_blank" rel="noopener">{E(it["title"])}</a>'
         f'<div class="meta">{"".join(meta)}</div>'
         f'<div class="kw">{"".join(f"<span>{E(k)}</span>" for k in kws)}</div></div>'
         f'<button class="fav" type="button" aria-pressed="false" aria-label="관심 공고로 저장" title="관심 공고로 저장">☆</button></li>'
