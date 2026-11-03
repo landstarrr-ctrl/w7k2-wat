@@ -90,6 +90,13 @@ li.m-msit{border-left-color:var(--msit)} li.m-multi{border-left-color:var(--mult
 .st.open{display:inline-block;color:var(--open);background:var(--open-bg)}
 .st.soon{display:inline-block;color:var(--soon);background:var(--soon-bg);outline:1px dashed var(--soon);outline-offset:-1px}
 .st.shut{display:inline-block;color:var(--shut);background:var(--shut-bg)}
+.st.urgent{display:inline-block;color:#fff;background:var(--seal);font-weight:700}
+.st.urgent::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#fff;
+  margin-right:6px;vertical-align:1px;animation:blink 1.1s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.st.urgent::before{animation:none}}
+.pill.new{display:none;color:var(--seal);background:transparent;border:1px solid var(--seal)}
+li.is-new .pill.new{display:inline-block}
 .count{font-size:14px;color:var(--muted);margin:4px 0 0}
 section.month{margin-top:36px}
 section.month h2{font-size:15px;font-weight:600;color:var(--muted);margin:0 0 6px;
@@ -107,11 +114,7 @@ li.row:last-child{border-bottom:0}
 .meta a{color:var(--muted)}
 .kw{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .kw span{font-size:12px;padding:1px 8px;border-radius:4px;background:var(--chip);color:var(--muted)}
-.seal{display:none;position:absolute;right:18px;top:16px;width:54px;height:54px;border-radius:50%;
-  border:2.5px solid var(--seal);color:var(--seal);font-weight:700;font-size:14px;
-  align-items:center;justify-content:center;transform:rotate(-12deg);letter-spacing:.08em}
-.seal::after{content:"";position:absolute;inset:3px;border-radius:50%;border:1px solid var(--seal);opacity:.6}
-li.is-new .seal{display:flex}
+
 .empty{background:var(--sheet);border-radius:6px;padding:32px 20px;color:var(--muted);margin-top:36px}
 [hidden]{display:none!important}
 footer{margin-top:48px;font-size:13px;color:var(--muted)}
@@ -124,12 +127,9 @@ footer a{color:var(--muted)}
   header h1{font-size:24px}
   li.row{grid-template-columns:1fr;gap:4px;padding:14px 70px 14px 12px}
   .date{font-size:15px}.date small{display:inline;margin-left:6px}
-  .seal{width:46px;height:46px;font-size:12px;right:12px}
 }
 @media (prefers-reduced-motion:no-preference){
-  li.is-new .seal{animation:stamp .5s cubic-bezier(.3,1.6,.5,1) both}
-  @keyframes stamp{from{transform:rotate(-12deg) scale(1.8);opacity:0}to{transform:rotate(-12deg) scale(1);opacity:1}}
-}
+  }
 """
 
 JS = """
@@ -144,7 +144,9 @@ JS = """
     var st=r.querySelector('.st'), b=day(r.dataset.start), e=day(r.dataset.end), label='', cls='';
     if(e&&e<today){label='마감';cls='shut';}
     else if(b&&b>today){var n=Math.round((b-today)/864e5);label='접수예정 · '+(n===0?'오늘':n+'일 뒤')+' 시작';cls='soon';}
-    else if(e){var left=Math.round((e-today)/864e5);label='접수중 · '+(left===0?'오늘 마감':'D-'+left);cls='open';}
+    else if(e){var left=Math.round((e-today)/864e5);
+      if(left<=14){label='마감 임박 · '+(left===0?'오늘 마감':'D-'+left);cls='urgent';}
+      else{label='접수중 · D-'+left;cls='open';}}
     else if(b){label='접수중';cls='open';}
     else if(r.dataset.status){label=r.dataset.status+' (확인 시점)';
       cls=r.dataset.status.indexOf('마감')>-1?'shut':r.dataset.status.indexOf('예정')>-1?'soon':'open';}
@@ -235,7 +237,6 @@ def _month_label(ym: str) -> str:
 def _row(it) -> str:
     _, md, year = _date_parts(it)
     kws = it.get("keywords") or []
-    text = "".join([it.get("title", ""), it.get("org", ""), it.get("source", "")]).replace(" ", "").lower()
     groups = it.get("groups") or []
     period = it.get("period", "")
     found = re.findall(r"\d{4}-\d{2}-\d{2}", period)
@@ -247,6 +248,9 @@ def _row(it) -> str:
         start = end = ""
     mname, mcls = ministry_badge(it)
     mpill = f'<span class="pill {mcls}">{E(mname)}</span>' if mname else ""
+    link_srcs = [l.get("source", "") for l in it.get("links") or []]
+    text = "".join([it.get("title", ""), it.get("org", ""), it.get("source", ""), *link_srcs,
+                    mname, it.get("ministry", ""), *kws]).replace(" ", "").lower()
     meta = []
     if it.get("org"):
         meta.append(f"<span><b>기관</b>{E(it['org'])}</span>")
@@ -263,11 +267,12 @@ def _row(it) -> str:
         f'data-status="{E(it.get("status", ""), quote=True)}">'
         f'<div class="date">{E(md)}<small>{E(year)}</small></div>'
         f'<div><div class="badges">{mpill}'
-        f'<span class="pill st"></span></div>'
+        f'<span class="pill st"></span>'
+        f'<span class="pill new">신규</span></div>'
         f'<a class="title" href="{E(it["url"], quote=True)}" target="_blank" rel="noopener">{E(it["title"])}</a>'
         f'<div class="meta">{"".join(meta)}</div>'
         f'<div class="kw">{"".join(f"<span>{E(k)}</span>" for k in kws)}</div></div>'
-        f'<div class="seal" aria-label="최근 3일 안에 새로 발견">신규</div></li>'
+        f'</li>'
     )
 
 
@@ -357,13 +362,14 @@ def render(*, title, items, groups, sources, updated, repo, new_hours, now, kosm
   {kosmo_html}
 </header>
 <div class="tools">
-  <input id="q" class="search" type="search" placeholder="공고명·기관으로 찾기" aria-label="공고 검색">
+  <input id="q" class="search" type="search" placeholder="공고명·기관·출처(KOSMO, IRIS…)로 찾기" aria-label="공고 검색(공고명, 기관, 출처)">
   <div class="tabs" role="tablist" aria-label="분류">{tabs_html}</div>
   <div class="opts"><label class="opts"><input type="checkbox" id="hideClosed">마감된 공고 숨기기</label>
     <span id="count" aria-live="polite" style="margin-left:auto"></span></div>
 </div>
 {body}
-<footer>최근 {new_hours}시간 안에 새로 발견한 공고에는 <b>신규</b> 도장이 찍힙니다. 신청 전에는 반드시 원문 공고를 확인하세요.</footer>
+<footer><b>신규</b> 표시는 이 감시 봇이 최근 {new_hours}시간 안에 처음 발견한 공고에 붙습니다(감시를 처음 시작할 때 이미 올라와 있던 공고는 제외). 
+<b style="color:var(--seal)">마감 임박</b>은 접수 마감까지 14일 이내 남은 공고입니다. 신청 전에는 반드시 원문 공고를 확인하세요.</footer>
 </div>
 <script>
 (function(){{
