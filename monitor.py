@@ -193,14 +193,10 @@ def fetch_mss(session, cfg, match):
             continue
         attrs = f"{a.get('href') or ''} {a.get('onclick') or ''}"
         m = re.search(r"bcIdx=(\d+)", attrs) or re.search(r"['\"](\d{6,})['\"]", attrs)
-        if m:
-            bid = m.group(1)
-            link = MSS_VIEW.format(id=bid)
-        else:
-            href = a.get("href") or ""
-            usable = href and href != "#" and not href.lower().startswith("javascript")
-            link = urljoin(list_url, href) if usable else list_url
-            bid = short_hash(title)
+        if not m:
+            continue  # 게시글 번호가 없는 링크(메뉴·배너·관련 사이트)는 공고가 아님
+        bid = m.group(1)
+        link = MSS_VIEW.format(id=bid)
         if bid in seen:
             continue
         seen.add(bid)
@@ -434,6 +430,14 @@ def run(cfg, dry_run=False) -> int:
     alerts: list[str] = []
     run_keys: dict[str, dict] = {}  # 이번 실행에서 처음 본 제목 키 -> 공고
     dup_links: list[tuple[str, dict]] = []
+
+    # 예전 버전이 게시글이 아닌 메뉴 링크를 공고로 잘못 기록한 것을 정리
+    before = len(state["items"])
+    state["items"] = [it for it in state["items"]
+                      if not (it["id"].startswith("mss:") and not it["id"][4:].isdigit())]
+    if len(state["items"]) != before:
+        changed = True
+        log(f"잘못 기록된 항목 {before - len(state['items'])}건을 정리했습니다.")
 
     existing_by_key = {it.get("tkey"): it for it in state["items"] if it.get("tkey")}
 
