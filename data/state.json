@@ -1345,13 +1345,13 @@
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T16:47+09:00"
+   "ok_time": "2026-11-03T17:55+09:00"
   },
   "KOSMO 모집공고": {
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-03",
-   "ok_time": "2026-11-03T16:47+09:00"
+   "ok_time": "2026-11-03T17:55+09:00"
   },
   "SMTECH 사업공고": {
    "initialized": true,
@@ -1367,8 +1367,8 @@
   }
  },
  "heartbeat": "2026-11-03",
- "updated": "2026-11-03T17:26+09:00",
+ "updated": "2026-11-03T17:55+09:00",
  "fix": "mss-v3",
  "cfg_hash": "17193d8d9f67",
- "dash_hash": "df20580723b0"
+ "dash_hash": "c1f366b3b110"
 }
