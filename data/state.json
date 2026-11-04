@@ -64,9 +64,50 @@
   "bd-be31:9541d2ac107a": "2027년공공분야로봇도입및실증지원사업수요조사",
   "bd-be31:ce1863274502": "2026년한국로봇산업진흥원연구장비임대운영기업모집",
   "bd-be31:b193faee5571": "한국로봇산업진흥원2026로보월드k로봇공공프리마켓가칭참여기업모집수요조사",
-  "bd-be31:ba9ae889997d": "2026년한체코첨단로봇산업협력센터구축사업지원과제모집"
+  "bd-be31:ba9ae889997d": "2026년한체코첨단로봇산업협력센터구축사업지원과제모집",
+  "bizinfo:PBLN_000000000127680": "2026년지역거점ax혁신기술개발사업신규지원대상과제공정응용솔루션axr&d응용제품axr&d",
+  "bizinfo:PBLN_000000000127679": "대전2026년북미시장진출지원사업kic실리콘밸리연계globalentryprogram모집",
+  "bizinfo:PBLN_000000000127674": "2026년스마트플래그십스토어소담상회withlotteon모집"
  },
  "items": [
+  {
+   "id": "bizinfo:PBLN_000000000127679",
+   "source": "기업마당",
+   "title": "[대전] 2026년 북미시장진출지원사업 KIC 실리콘밸리 연계 Global Entry Program 모집 공고",
+   "url": "https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000127679",
+   "org": "대전광역시 / 대전일자리경제진흥원",
+   "ministry": "대전광역시",
+   "period": "2026-11-02 ~ 2026-11-11",
+   "posted": "2026-11-04",
+   "keywords": [
+    "AI·중소"
+   ],
+   "tags": "기술,수출,대전,2026,비자수수료,딥테크,숙박비,항공료,보험료,미국,액셀러레이팅,글로벌,대전일자리경제진흥원,ICT,AI,대전광역시,중소기업,실리콘밸리,북미시장",
+   "tkey": "대전2026년북미시장진출지원사업kic실리콘밸리연계globalentryprogram모집",
+   "found_at": "2026-11-04T15:55+09:00",
+   "groups": [
+    "제조AI·AX"
+   ]
+  },
+  {
+   "id": "bizinfo:PBLN_000000000127674",
+   "source": "기업마당",
+   "title": "2026년 스마트 플래그십 스토어 (소담상회 with LOTTE ON) 모집 공고",
+   "url": "https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000127674",
+   "org": "중소벤처기업부 / 한국중소벤처기업유통원",
+   "ministry": "중소벤처기업부",
+   "period": "2026-11-02 ~ 2026-11-16",
+   "posted": "2026-11-04",
+   "keywords": [
+    "AI·활용"
+   ],
+   "tags": "내수,경영,서울,부산,대구,인천,전남광주,대전,울산,세종,경기,강원,충북,충남,전북,경북,경남,제주,상담기회,플래그십스토어,판매기회,2026,브랜드노출,한국중소벤처기업유통원,AI활용,판매부스,체험프로그램,B2C,O2O,제품홍보,컨설팅,중소벤처기업부,소상공인",
+   "tkey": "2026년스마트플래그십스토어소담상회withlotteon모집",
+   "found_at": "2026-11-04T15:55+09:00",
+   "groups": [
+    "제조AI·AX"
+   ]
+  },
   {
    "id": "bizinfo:PBLN_000000000127652",
    "source": "기업마당",
@@ -1047,6 +1088,12 @@
     "제조AI·AX",
     "피지컬AI·로봇",
     "데이터·솔루션·R&D"
+   ],
+   "links": [
+    {
+     "source": "기업마당",
+     "url": "https://www.bizinfo.go.kr/sii/siia/selectSIIA200Detail.do?pblancId=PBLN_000000000127680"
+    }
    ]
   },
   {
@@ -1327,48 +1374,47 @@
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-04",
-   "ok_time": "2026-11-04T09:10+09:00"
+   "ok_time": "2026-11-04T15:55+09:00"
   },
   "중기부 누리집": {
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-04",
-   "ok_time": "2026-11-04T09:10+09:00"
+   "ok_time": "2026-11-04T15:55+09:00"
   },
   "IRIS": {
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-04",
-   "ok_time": "2026-11-04T09:10+09:00"
+   "ok_time": "2026-11-04T15:55+09:00"
   },
   "KOSMO 사업공고": {
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-04",
-   "ok_time": "2026-11-04T09:10+09:00"
+   "ok_time": "2026-11-04T15:55+09:00"
   },
   "KOSMO 모집공고": {
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-04",
-   "ok_time": "2026-11-04T09:10+09:00"
+   "ok_time": "2026-11-04T15:55+09:00"
   },
   "SMTECH 사업공고": {
    "initialized": true,
-   "fails": 1,
+   "fails": 0,
    "ok_at": "2026-11-04",
-   "ok_time": "2026-11-04T04:25+09:00",
-   "error": "게시판을 읽지 못했습니다: www.smtech.go.kr/front/ifg/no/notice02_list.do → Timeout | www.smtech.go.kr/front/ifg/no/notice02_list.do?searchCondition=&searchKeyword= → Timeout | smtech.go.kr/front/ifg/no/notice02_"
+   "ok_time": "2026-11-04T15:55+09:00"
   },
   "로봇산업진흥원 사업공고": {
    "initialized": true,
    "fails": 0,
    "ok_at": "2026-11-04",
-   "ok_time": "2026-11-04T09:10+09:00"
+   "ok_time": "2026-11-04T15:55+09:00"
   }
  },
  "heartbeat": "2026-11-04",
- "updated": "2026-11-04T09:10+09:00",
+ "updated": "2026-11-04T15:55+09:00",
  "fix": "mss-v3",
  "cfg_hash": "17193d8d9f67",
  "dash_hash": "c1f366b3b110"
