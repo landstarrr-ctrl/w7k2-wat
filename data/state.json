@@ -91,7 +91,8 @@
   "kosmo-a07e:2026-N-0183": "세메스선정기업대상2026대중소상생형스마트공장구축사업",
   "bizinfo:PBLN_000000000127759": "충남2026년ai팩토리사업연계지역제조기업디지털전환확산지원사업모집재",
   "bizinfo:PBLN_000000000127771": "전남광주2026년전통식품육성지원사업농촌자원복합산업화대상자모집재",
-  "kosmo-a07e:2026-N-0147": "광주2026년제조dx멘토단활용지원구축지도도입기업모집"
+  "kosmo-a07e:2026-N-0147": "광주2026년제조dx멘토단활용지원구축지도도입기업모집",
+  "iris:017678": "2026년딥테크챌린지프로젝트dcp생태계혁신형시행계획"
  },
  "items": [
   {
@@ -1871,12 +1872,29 @@
     "스마트공장",
     "데이터·솔루션·R&D"
    ]
+  },
+  {
+   "id": "iris:017678",
+   "source": "IRIS",
+   "title": "2026년도 딥테크 챌린지 프로젝트(DCP)생태계혁신형 시행계획 공고",
+   "url": "https://www.iris.go.kr/contents/retrieveBsnsAncmView.do?ancmPrg=ancmIng&ancmId=017678",
+   "org": "중소벤처기업부 / 중소기업기술정보진흥원",
+   "ministry": "중소벤처기업부",
+   "period": "2026-02-20 ~ 2026-11-17",
+   "posted": "2026-01-08",
+   "status": "",
+   "keywords": [],
+   "tkey": "2026년딥테크챌린지프로젝트dcp생태계혁신형시행계획",
+   "found_at": "2026-11-11T04:38+09:00",
+   "groups": [
+    "기타"
+   ]
   }
  ],
  "sources": {
   "기업마당": {
    "initialized": true,
-   "fails": 1,
+   "fails": 2,
    "ok_at": "2026-11-10",
    "ok_time": "2026-11-10T12:25+09:00",
    "error": "접속 실패: 500 Server Error: Internal Server Error for url: https://www.bizinfo.go.kr/uss/rss/bizinfoApi.do?crtfcKey=im8Z1q&dataType=json&searchCnt=300"
@@ -1884,42 +1902,42 @@
   "중기부 누리집": {
    "initialized": true,
    "fails": 0,
-   "ok_at": "2026-11-10",
-   "ok_time": "2026-11-10T20:40+09:00"
+   "ok_at": "2026-11-11",
+   "ok_time": "2026-11-11T04:38+09:00"
   },
   "IRIS": {
    "initialized": true,
    "fails": 0,
-   "ok_at": "2026-11-10",
-   "ok_time": "2026-11-10T20:40+09:00"
+   "ok_at": "2026-11-11",
+   "ok_time": "2026-11-11T04:38+09:00"
   },
   "KOSMO 사업공고": {
    "initialized": true,
    "fails": 0,
-   "ok_at": "2026-11-10",
-   "ok_time": "2026-11-10T20:40+09:00"
+   "ok_at": "2026-11-11",
+   "ok_time": "2026-11-11T04:38+09:00"
   },
   "KOSMO 모집공고": {
    "initialized": true,
    "fails": 0,
-   "ok_at": "2026-11-10",
-   "ok_time": "2026-11-10T20:40+09:00"
+   "ok_at": "2026-11-11",
+   "ok_time": "2026-11-11T04:38+09:00"
   },
   "SMTECH 사업공고": {
    "initialized": true,
    "fails": 0,
-   "ok_at": "2026-11-10",
-   "ok_time": "2026-11-10T20:40+09:00"
+   "ok_at": "2026-11-11",
+   "ok_time": "2026-11-11T04:38+09:00"
   },
   "로봇산업진흥원 사업공고": {
    "initialized": true,
    "fails": 0,
-   "ok_at": "2026-11-10",
-   "ok_time": "2026-11-10T20:40+09:00"
+   "ok_at": "2026-11-11",
+   "ok_time": "2026-11-11T04:38+09:00"
   }
  },
- "heartbeat": "2026-11-10",
- "updated": "2026-11-10T20:40+09:00",
+ "heartbeat": "2026-11-11",
+ "updated": "2026-11-11T04:38+09:00",
  "fix": "mss-v3",
  "cfg_hash": "17193d8d9f67",
  "dash_hash": "c1f366b3b110"
